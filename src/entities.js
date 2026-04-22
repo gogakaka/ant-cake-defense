@@ -79,7 +79,15 @@ class Ant {
   update(dt) {
     if (this.dead) return;
     this.ensurePath();
-    if (!this.path || this.pathIdx >= this.path.length) {
+    if (!this.path) {
+      // No reachable target — wait (all cakes may be taken). Retry next frame.
+      this.pathDirty = true;
+      return;
+    }
+    if (this.pathIdx >= this.path.length) {
+      // Already at the goal cell (e.g., re-targeted a cake on our current tile).
+      // Trigger arrival so we pick up the cake or re-target instead of spinning.
+      this.onArrive();
       this.pathDirty = true;
       return;
     }
