@@ -1,10 +1,10 @@
 :root {
-  --bg-0: #0b0d1a;
-  --bg-1: #141729;
-  --bg-2: #1b1f38;
-  --panel: rgba(24, 27, 51, 0.85);
-  --panel-border: rgba(148, 163, 220, 0.18);
-  --panel-border-strong: rgba(148, 163, 220, 0.35);
+  --bg-0: #1c2040;
+  --bg-1: #272b4d;
+  --bg-2: #30355c;
+  --panel: rgba(38, 43, 75, 0.85);
+  --panel-border: rgba(176, 190, 240, 0.22);
+  --panel-border-strong: rgba(176, 190, 240, 0.4);
   --text: #e7ecff;
   --text-dim: #96a1c7;
   --text-mute: #6c7597;
@@ -25,8 +25,8 @@ html, body {
   padding: 0;
   height: 100%;
   background:
-    radial-gradient(1200px 800px at 20% -10%, #1d2147 0%, transparent 60%),
-    radial-gradient(1000px 700px at 110% 110%, #2a1940 0%, transparent 55%),
+    radial-gradient(1200px 800px at 20% -10%, #353a6a 0%, transparent 60%),
+    radial-gradient(1000px 700px at 110% 110%, #3e2f5c 0%, transparent 55%),
     var(--bg-0);
   color: var(--text);
   font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -46,11 +46,10 @@ html, body {
 
 #stage {
   position: relative;
-  width: 1440px;
-  height: 840px;
-  max-width: 100%;
-  max-height: 100%;
-  aspect-ratio: 1440 / 840;
+  aspect-ratio: 1600 / 880;
+  width: 100%;
+  max-width: calc((100vh - 16px) * 1600 / 880);
+  max-height: calc(100vh - 16px);
   border-radius: 18px;
   overflow: hidden;
   box-shadow: var(--shadow-lg);
