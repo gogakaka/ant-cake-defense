@@ -1,0 +1,206 @@
+/* =========================================================================
+   Mobile UI overrides
+   - Loaded AFTER style.css so these rules win on conflict.
+   - All rules live inside media queries that match only touch / small devices,
+     so desktop layout stays untouched.
+   - Triggers: coarse pointer (phones/tablets) OR viewport narrower than 900px,
+     OR the `.is-mobile` class added by src/mobile.js (manual force).
+   ========================================================================= */
+
+/* Rotation prompt element is in the DOM but hidden by default. */
+#rotate-prompt { display: none; }
+
+/* ------------------------------------------------------------------ */
+/*  Mobile layout (phones + tablets + small windows)                   */
+/* ------------------------------------------------------------------ */
+@media (pointer: coarse), (max-width: 900px) {
+  html.is-mobile, html.is-mobile body,
+  html, body {
+    height: 100%;
+    height: 100dvh;
+    overscroll-behavior: none;
+  }
+
+  /* Fill the viewport edge-to-edge — no 32px gutter on phones. */
+  #app { padding: 0; }
+
+  #stage {
+    border-radius: 0;
+    border: none;
+    max-width: 100vw;
+    max-width: 100dvw;
+    max-height: 100vh;
+    max-height: 100dvh;
+    box-shadow: none;
+  }
+
+  /* Kill iOS double-tap zoom and native gestures on the game canvas. */
+  #game { touch-action: manipulation; }
+
+  /* -- HUD: tighter padding but bigger touch targets ----------------- */
+  #hud {
+    top: 6px;
+    left: 6px;
+    right: 6px;
+    height: auto;
+    min-height: 54px;
+    padding: 6px 8px;
+    gap: 6px;
+    border-radius: 12px;
+  }
+
+  .hud-card {
+    padding: 4px 8px;
+    min-width: 0;
+  }
+
+  .hud-card.wide { min-width: 110px; }
+
+  .hud-label    { font-size: 9px; letter-spacing: 0.08em; }
+  .hud-value    { font-size: 15px; gap: 4px; }
+  .hud-sub      { font-size: 10px; }
+
+  .hud-buttons { gap: 4px; }
+
+  /* 44×44pt is the Apple HIG minimum tap target. */
+  .icon-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 12px;
+    border-radius: 10px;
+  }
+
+  /* -- Popup (placement / upgrade menu) ------------------------------ */
+  .popup {
+    min-width: 240px;
+    max-width: calc(100vw - 24px);
+    padding: 12px;
+  }
+
+  .popup-close {
+    width: 32px;
+    height: 32px;
+    top: 6px;
+    right: 6px;
+  }
+
+  .tower-info       { padding: 8px; padding-right: 42px; }
+  .tower-stat .stat-value { font-size: 13px; }
+
+  .upgrade-btn {
+    padding: 12px 10px;
+    min-height: 56px;
+  }
+  .upgrade-btn .u-title { font-size: 13px; }
+  .upgrade-btn .u-desc  { font-size: 11.5px; line-height: 1.4; }
+  .upgrade-btn .u-cost  { font-size: 12px; }
+
+  /* On small phones 3-col upgrade grid overflows; use 2 columns. */
+  .upgrade-row.row-grid {
+    grid-template-columns: repeat(2, minmax(110px, 1fr));
+  }
+
+  .sell-btn {
+    padding: 12px;
+    font-size: 13px;
+    min-height: 44px;
+  }
+
+  /* -- Start / end overlays: fit narrow screens ---------------------- */
+  .overlay-card {
+    width: calc(100% - 24px);
+    max-width: 480px;
+    padding: 22px 20px;
+    max-height: 92vh;
+    max-height: 92dvh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .logo          { gap: 10px; margin-bottom: 16px; }
+  .logo-ant      { font-size: 32px; }
+  .logo-title    { font-size: 20px; }
+  .logo-sub      { font-size: 11px; letter-spacing: 0.12em; }
+
+  .rules         { gap: 8px; margin-bottom: 16px; }
+  .rule          { font-size: 12.5px; padding: 8px 10px; line-height: 1.45; }
+
+  .overlay-title { font-size: 24px; }
+  .overlay-sub   { font-size: 13px; margin-bottom: 14px; }
+
+  .overlay-stats .stat { padding: 8px 12px; min-width: 72px; }
+  .overlay-stats .stat .v { font-size: 16px; }
+
+  .primary-btn {
+    padding: 14px 28px;
+    font-size: 14px;
+    min-height: 48px;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Very narrow phones (< 420px): drop label text, keep icons only.    */
+/* ------------------------------------------------------------------ */
+@media (pointer: coarse) and (max-width: 420px),
+       (max-width: 420px) {
+  .hud-card .hud-label { display: none; }
+  .hud-value { font-size: 14px; }
+  #hud { gap: 4px; padding: 4px 6px; }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Portrait mobile: hide game, show rotation prompt instead.          */
+/* ------------------------------------------------------------------ */
+@media (pointer: coarse) and (orientation: portrait),
+       (max-width: 900px) and (orientation: portrait) {
+  #rotate-prompt {
+    display: flex;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background:
+      radial-gradient(1000px 700px at 20% -10%, #d8e0f5 0%, transparent 62%),
+      radial-gradient(800px 600px at 110% 110%, #f0dfed 0%, transparent 58%),
+      var(--bg-0);
+  }
+
+  .rotate-card {
+    text-align: center;
+    padding: 28px 22px;
+    border-radius: 20px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(244, 247, 253, 0.96));
+    border: 1px solid var(--panel-border-strong);
+    box-shadow: var(--shadow-lg);
+    max-width: 340px;
+  }
+
+  .rotate-icon {
+    font-size: 44px;
+    margin-bottom: 12px;
+    display: inline-block;
+    animation: rotate-wiggle 2.4s ease-in-out infinite;
+  }
+
+  @keyframes rotate-wiggle {
+    0%, 15%  { transform: rotate(0deg); }
+    50%      { transform: rotate(-90deg); }
+    85%, 100%{ transform: rotate(-90deg); }
+  }
+
+  .rotate-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 6px;
+    letter-spacing: 0.02em;
+  }
+
+  .rotate-sub {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+}
