@@ -665,7 +665,8 @@ class Game {
 
     let upgradeHtml = '';
     if (upgrades.length) {
-      upgradeHtml = '<div class="upgrade-row">';
+      const rowClass = upgrades.length >= 4 ? 'upgrade-row row-2x2' : 'upgrade-row';
+      upgradeHtml = `<div class="${rowClass}">`;
       for (const upKey of upgrades) {
         const up = TOWER_DEFS[upKey];
         const afford = this.credits >= up.cost;

@@ -543,6 +543,19 @@ class Tower {
     } else if (d.path === 'dual') {
       roundRect(ctx, -5, -9, 20, 5, 2); ctx.fill();
       roundRect(ctx, -5,  4, 20, 5, 2); ctx.fill();
+    } else if (d.path === 'sniper') {
+      // compact body
+      roundRect(ctx, -8, -5, 10, 10, 2); ctx.fill();
+      // long thin barrel
+      ctx.fillRect(2, -2, 22, 4);
+      // muzzle tip
+      ctx.fillStyle = '#1b1f38';
+      ctx.fillRect(22, -2, 2, 4);
+      // scope bump on top of body
+      ctx.fillStyle = d.color;
+      ctx.beginPath(); ctx.arc(-3, -6, 2.8, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(-3, -6, 1.3, 0, Math.PI*2); ctx.fill();
     } else {
       roundRect(ctx, -6, -5, 20, 10, 3); ctx.fill();
     }
