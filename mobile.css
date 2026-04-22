@@ -32,6 +32,9 @@
     max-height: calc(100dvh - 20px);
     box-shadow: var(--shadow-md);
     will-change: transform;
+    /* Pinch-zoom math assumes origin at top-left so tx/ty are plain viewport
+       offsets independent of scale. */
+    transform-origin: 0 0;
   }
 
   /* `none` disables the browser's scroll/pinch/double-tap on the canvas so
