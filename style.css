@@ -58,6 +58,12 @@ html, body {
   border: 1px solid var(--panel-border);
 }
 
+#board {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
 #game {
   position: absolute;
   inset: 0;
