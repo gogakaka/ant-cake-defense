@@ -64,6 +64,9 @@
   let current = { tx: 0, ty: 0, scale: 1 };
 
   function getStage() { return document.getElementById('stage'); }
+  // Pan / zoom applies to the inner board only — HUD and popup are siblings
+  // of #board inside #stage, so they stay fixed while the tiles transform.
+  function getBoard() { return document.getElementById('board') || getStage(); }
 
   function clampScale(s) { return Math.max(MIN_SCALE, Math.min(MAX_SCALE, s)); }
 
@@ -85,10 +88,10 @@
   }
 
   function applyTransform(t) {
-    const stage = getStage();
-    if (!stage) return;
+    const board = getBoard();
+    if (!board) return;
     const identity = t.tx === 0 && t.ty === 0 && t.scale === 1;
-    stage.style.transform = identity
+    board.style.transform = identity
       ? ''
       : `translate(${t.tx}px, ${t.ty}px) scale(${t.scale})`;
   }
@@ -131,7 +134,7 @@
     const dist = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY) || 1;
     const midX = (a.clientX + b.clientX) / 2;
     const midY = (a.clientY + b.clientY) / 2;
-    const rect = getStage().getBoundingClientRect();
+    const rect = getBoard().getBoundingClientRect();
     return {
       mode: 'pinch',
       ida: a.identifier, idb: b.identifier,
@@ -139,7 +142,7 @@
       startMidX: midX, startMidY: midY,
       startScale: current.scale,
       baseTx: current.tx, baseTy: current.ty,
-      // Natural (pre-transform) top-left of the stage in viewport coords —
+      // Natural (pre-transform) top-left of the board in viewport coords —
       // held constant through the gesture so anchoring math stays stable.
       natLeft: rect.left - current.tx,
       natTop:  rect.top  - current.ty,
@@ -147,22 +150,22 @@
   }
 
   function installStageSwipe() {
-    const stage = getStage();
-    if (!stage) return;
+    const board = getBoard();
+    if (!board) return;
 
     current = loadTransform();
     applyTransform(current);
 
-    stage.addEventListener('touchstart',  onTouchStart,  { passive: true  });
-    stage.addEventListener('touchmove',   onTouchMove,   { passive: false });
-    stage.addEventListener('touchend',    onTouchEnd,    { passive: false });
-    stage.addEventListener('touchcancel', onTouchCancel, { passive: true  });
+    board.addEventListener('touchstart',  onTouchStart,  { passive: true  });
+    board.addEventListener('touchmove',   onTouchMove,   { passive: false });
+    board.addEventListener('touchend',    onTouchEnd,    { passive: false });
+    board.addEventListener('touchcancel', onTouchCancel, { passive: true  });
   }
 
   function onTouchStart(e) {
     if (!gesture && isInteractiveTarget(e.target)) { gesture = null; return; }
     gesture = snapshot(e.touches);
-    if (gesture?.mode === 'pinch') getStage()?.classList.add('dragging');
+    if (gesture?.mode === 'pinch') getBoard()?.classList.add('dragging');
   }
 
   function onTouchMove(e) {
@@ -176,7 +179,7 @@
       if (!gesture.dragging) {
         if (Math.hypot(dx, dy) < DRAG_THRESHOLD) return;
         gesture.dragging = true;
-        getStage()?.classList.add('dragging');
+        getBoard()?.classList.add('dragging');
       }
       e.preventDefault();
       setTransform({
@@ -220,16 +223,16 @@
       // Re-baseline with the remaining touch(es) so pinch→pan / pan→pinch
       // transitions stay smooth.
       gesture = snapshot(e.touches);
-      if (gesture?.mode === 'pinch') getStage()?.classList.add('dragging');
-      else getStage()?.classList.remove('dragging');
+      if (gesture?.mode === 'pinch') getBoard()?.classList.add('dragging');
+      else getBoard()?.classList.remove('dragging');
     } else {
-      getStage()?.classList.remove('dragging');
+      getBoard()?.classList.remove('dragging');
       gesture = null;
     }
   }
 
   function onTouchCancel() {
-    getStage()?.classList.remove('dragging');
+    getBoard()?.classList.remove('dragging');
     gesture = null;
   }
 

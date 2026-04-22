@@ -21,19 +21,48 @@
     overscroll-behavior: none;
   }
 
-  /* Breathing room around the stage so buttons near the edges are reachable. */
-  #app { padding: 10px; }
+  /* On mobile the whole stage fills the viewport: HUD sits above a fixed
+     board frame, popup docks on the right. Stage itself never transforms —
+     only the #board pans / zooms inside its own overflow: hidden frame. */
+  #app {
+    padding: 0;
+    align-items: stretch;
+    justify-content: stretch;
+  }
 
   #stage {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 6px;
+    aspect-ratio: auto;
+    width: 100%;
+    max-width: none;
+    height: 100vh;
+    height: 100dvh;
+    max-height: none;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+    background: transparent;
+    overflow: hidden;
+    transform: none !important;
+    will-change: auto;
+  }
+
+  /* The fixed frame: HUD and popup stay outside its transform — only the
+     canvas inside pans/zooms. Origin 0 0 keeps pinch math as plain pixels. */
+  #board {
+    position: relative;
+    inset: auto;
+    flex: 1;
+    min-height: 0;
     border-radius: 12px;
-    max-width: calc(100vw - 20px);
-    max-width: calc(100dvw - 20px);
-    max-height: calc(100vh - 20px);
-    max-height: calc(100dvh - 20px);
+    overflow: hidden;
+    background: var(--bg-1);
+    border: 1px solid var(--panel-border);
     box-shadow: var(--shadow-md);
     will-change: transform;
-    /* Pinch-zoom math assumes origin at top-left so tx/ty are plain viewport
-       offsets independent of scale. */
     transform-origin: 0 0;
   }
 
@@ -42,13 +71,18 @@
   #game { touch-action: none; }
 
   /* Subtle lift while actively swiping the board. */
-  #stage.dragging { box-shadow: var(--shadow-lg); }
+  #board.dragging { box-shadow: var(--shadow-lg); }
 
-  /* -- HUD: tighter padding but bigger touch targets ----------------- */
+  /* -- HUD: static flex item above the board, no longer overlayed ----
+     order: -1 places it before #board in the flex flow without changing
+     DOM order (keeps desktop z-index stacking intact). */
   #hud {
-    top: 6px;
-    left: 6px;
-    right: 6px;
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    order: -1;
+    flex-shrink: 0;
     height: auto;
     min-height: 54px;
     padding: 6px 8px;
@@ -77,12 +111,27 @@
     border-radius: 10px;
   }
 
-  /* -- Popup (placement / upgrade menu) ------------------------------ */
+  /* -- Popup (placement / upgrade menu) ------------------------------
+     Docked to the right side of the viewport, outside the pan/zoom
+     transform. Overlays the board so the left area (tiles) stays visible.
+     Position is fixed, independent of tower / tile world coordinates — the
+     JS popup positioning in game.js is skipped when is-mobile is set. */
   .popup {
-    min-width: 240px;
-    max-width: calc(100vw - 24px);
+    position: fixed !important;
+    top: 74px;
+    right: 8px;
+    bottom: 8px;
+    left: auto !important;
+    width: 300px;
+    max-width: 44vw;
+    min-width: 0;
     padding: 12px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    transform: none !important;
   }
+
+  .popup-arrow { display: none; }
 
   .popup-close {
     width: 32px;

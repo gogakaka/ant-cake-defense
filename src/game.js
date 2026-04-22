@@ -613,6 +613,13 @@ class Game {
   positionPopupAt(world) {
     const popup = document.getElementById('popup');
     popup.classList.remove('hidden');
+    // On mobile the popup is docked (fixed) on the right side via CSS — skip
+    // the tower-relative pixel positioning so it doesn't fight the stylesheet.
+    if (document.documentElement.classList.contains('is-mobile')) {
+      popup.style.left = '';
+      popup.style.top = '';
+      return;
+    }
     requestAnimationFrame(() => {
       const rect = this.canvas.getBoundingClientRect();
       const stage = document.getElementById('stage').getBoundingClientRect();
