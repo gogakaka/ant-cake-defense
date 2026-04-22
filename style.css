@@ -322,19 +322,10 @@ html, body {
   gap: 8px;
 }
 
-.upgrade-row.row-2x2 {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(120px, 1fr));
-}
-
-.upgrade-row.row-3x2 {
+/* 4+ options: flow into rows of 3 max, growing downward */
+.upgrade-row.row-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(115px, 1fr));
-}
-
-.upgrade-row.row-4x2 {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(110px, 1fr));
 }
 
 .upgrade-btn {

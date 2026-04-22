@@ -677,12 +677,8 @@ class Game {
 
     let upgradeHtml = '';
     if (upgrades.length) {
-      const c = upgrades.length;
-      const rowClass =
-        c >= 7 ? 'upgrade-row row-4x2' :
-        c >= 5 ? 'upgrade-row row-3x2' :
-        c >= 4 ? 'upgrade-row row-2x2' :
-                 'upgrade-row';
+      // ≤3 options → single flex row. ≥4 → 3-column grid that wraps downward.
+      const rowClass = upgrades.length >= 4 ? 'upgrade-row row-grid' : 'upgrade-row';
       upgradeHtml = `<div class="${rowClass}">`;
       for (const upKey of upgrades) {
         const up = TOWER_DEFS[upKey];
