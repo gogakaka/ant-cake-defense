@@ -10,6 +10,9 @@
 /* Rotation prompt element is in the DOM but hidden by default. */
 #rotate-prompt { display: none; }
 
+/* Stage-drag grip is desktop-hidden; shown inside the mobile media query. */
+#stage-grip { display: none; }
+
 /* ------------------------------------------------------------------ */
 /*  Mobile layout (phones + tablets + small windows)                   */
 /* ------------------------------------------------------------------ */
@@ -21,21 +24,56 @@
     overscroll-behavior: none;
   }
 
-  /* Fill the viewport edge-to-edge — no 32px gutter on phones. */
-  #app { padding: 0; }
+  /* Breathing room around the stage so buttons near the edges are reachable. */
+  #app { padding: 10px; }
 
   #stage {
-    border-radius: 0;
-    border: none;
-    max-width: 100vw;
-    max-width: 100dvw;
-    max-height: 100vh;
-    max-height: 100dvh;
-    box-shadow: none;
+    border-radius: 12px;
+    max-width: calc(100vw - 20px);
+    max-width: calc(100dvw - 20px);
+    max-height: calc(100vh - 20px);
+    max-height: calc(100dvh - 20px);
+    box-shadow: var(--shadow-md);
+    will-change: transform;
   }
 
   /* Kill iOS double-tap zoom and native gestures on the game canvas. */
   #game { touch-action: manipulation; }
+
+  /* -- Stage grip: drag to reposition the whole board, no snapping --- */
+  #stage-grip {
+    position: fixed;
+    right: 10px;
+    bottom: 10px;
+    z-index: 60;
+    width: 46px;
+    height: 46px;
+    padding: 0;
+    border-radius: 14px;
+    border: 1px solid var(--panel-border-strong);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 247, 253, 0.92));
+    box-shadow: var(--shadow-md);
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+  }
+
+  #stage-grip:active {
+    cursor: grabbing;
+    background: rgba(90, 134, 255, 0.18);
+    color: var(--accent);
+    transform: scale(0.96);
+  }
+
+  #stage-grip.dragging {
+    background: rgba(90, 134, 255, 0.22);
+    color: var(--accent);
+  }
 
   /* -- HUD: tighter padding but bigger touch targets ----------------- */
   #hud {

@@ -40,8 +40,107 @@
 
   onReady(() => {
     ensureRotatePrompt();
+    ensureStageGrip();
     guardCanvasGestures();
   });
+
+  /**
+   * Free-form stage repositioning.
+   * The HUD buttons often get crowded against the screen edges on phones.
+   * A floating grip lets the player drag the whole stage to wherever feels
+   * comfortable — no snap back, no viewport clamp. Position persists.
+   */
+  const STORAGE_KEY = 'acd.stage-offset';
+  let gripDrag = null;
+
+  function getStage() { return document.getElementById('stage'); }
+
+  function loadOffset() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return { x: 0, y: 0 };
+      const v = JSON.parse(raw);
+      return { x: Number(v.x) || 0, y: Number(v.y) || 0 };
+    } catch { return { x: 0, y: 0 }; }
+  }
+
+  function saveOffset(x, y) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ x, y })); } catch {}
+  }
+
+  function applyOffset(x, y) {
+    const stage = getStage();
+    if (!stage) return;
+    stage.style.transform = (x || y) ? `translate(${x}px, ${y}px)` : '';
+  }
+
+  function ensureStageGrip() {
+    if (document.getElementById('stage-grip')) return;
+    const btn = document.createElement('button');
+    btn.id = 'stage-grip';
+    btn.type = 'button';
+    btn.setAttribute('aria-label', '게임 화면 이동 (더블탭으로 원위치)');
+    btn.title = '드래그하여 이동 · 더블탭으로 원위치';
+    btn.innerHTML = `
+      <svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor" aria-hidden="true">
+        <circle cx="6" cy="5" r="1.5"/><circle cx="10" cy="5" r="1.5"/><circle cx="14" cy="5" r="1.5"/>
+        <circle cx="6" cy="10" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="14" cy="10" r="1.5"/>
+        <circle cx="6" cy="15" r="1.5"/><circle cx="10" cy="15" r="1.5"/><circle cx="14" cy="15" r="1.5"/>
+      </svg>`;
+    document.body.appendChild(btn);
+
+    const initial = loadOffset();
+    applyOffset(initial.x, initial.y);
+
+    btn.addEventListener('pointerdown', onGripDown);
+    btn.addEventListener('dblclick', (e) => {
+      e.preventDefault();
+      applyOffset(0, 0);
+      saveOffset(0, 0);
+    });
+  }
+
+  function onGripDown(e) {
+    if (e.button !== undefined && e.button !== 0) return;
+    e.preventDefault();
+    const btn = e.currentTarget;
+    const base = loadOffset();
+    gripDrag = {
+      id: e.pointerId,
+      startX: e.clientX,
+      startY: e.clientY,
+      baseX: base.x,
+      baseY: base.y,
+      moved: false,
+    };
+    btn.classList.add('dragging');
+    try { btn.setPointerCapture(e.pointerId); } catch {}
+    btn.addEventListener('pointermove', onGripMove);
+    btn.addEventListener('pointerup', onGripUp);
+    btn.addEventListener('pointercancel', onGripUp);
+  }
+
+  function onGripMove(e) {
+    if (!gripDrag || e.pointerId !== gripDrag.id) return;
+    const dx = e.clientX - gripDrag.startX;
+    const dy = e.clientY - gripDrag.startY;
+    if (!gripDrag.moved && Math.hypot(dx, dy) > 2) gripDrag.moved = true;
+    applyOffset(gripDrag.baseX + dx, gripDrag.baseY + dy);
+  }
+
+  function onGripUp(e) {
+    if (!gripDrag || e.pointerId !== gripDrag.id) return;
+    const btn = e.currentTarget;
+    const dx = e.clientX - gripDrag.startX;
+    const dy = e.clientY - gripDrag.startY;
+    if (gripDrag.moved) saveOffset(gripDrag.baseX + dx, gripDrag.baseY + dy);
+    btn.classList.remove('dragging');
+    try { btn.releasePointerCapture?.(e.pointerId); } catch {}
+    btn.removeEventListener('pointermove', onGripMove);
+    btn.removeEventListener('pointerup', onGripUp);
+    btn.removeEventListener('pointercancel', onGripUp);
+    gripDrag = null;
+  }
 
   /**
    * Inject the portrait rotation prompt if not already present in the HTML.
