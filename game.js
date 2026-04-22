@@ -85,26 +85,61 @@ const TOWER_DEFS = {
     path: 'dual', level: 3,
     desc: '세 발 동시 발사.'
   },
+  // L4
+  laser4: {
+    key: 'laser4', name: '스톰 Lv.4', icon: '⚡', color: '#ff1f78',
+    cost: 400, damage: 12, range: 3.8, fireRate: 8.5,
+    path: 'laser', beam: true, chain: 3, level: 4,
+    desc: '연쇄 번개가 3마리까지 전이.'
+  },
+  missile4: {
+    key: 'missile4', name: '시즈 Lv.4', icon: '☄', color: '#ff7520',
+    cost: 400, damage: 85, range: 4.2, fireRate: 0.45, projSpeed: 320,
+    splash: 2.2, path: 'missile', level: 4,
+    desc: '거대한 포탄으로 광역 폭격.'
+  },
+  dual4: {
+    key: 'dual4', name: '쿼드 Lv.4', icon: '✴', color: '#22c078',
+    cost: 400, damage: 13, shots: 4, range: 3.6, fireRate: 2.6, projSpeed: 700,
+    path: 'dual', level: 4,
+    desc: '네 발 동시 사격.'
+  },
+  // L5
+  laser5: {
+    key: 'laser5', name: '보이드 Lv.5', icon: '✦', color: '#d040ff',
+    cost: 700, damage: 22, range: 4.2, fireRate: 10,
+    path: 'laser', beam: true, chain: 5, level: 5,
+    desc: '공간을 가르는 궁극의 레이저 · 5마리 연쇄.'
+  },
+  missile5: {
+    key: 'missile5', name: '오비탈 Lv.5', icon: '☢', color: '#ff5010',
+    cost: 700, damage: 170, range: 4.6, fireRate: 0.45, projSpeed: 300,
+    splash: 3.0, path: 'missile', level: 5,
+    desc: '궤도에서 낙하하는 초대형 폭발.'
+  },
+  dual5: {
+    key: 'dual5', name: '바라지 Lv.5', icon: '❋', color: '#00d096',
+    cost: 700, damage: 18, shots: 5, range: 4.0, fireRate: 3.0, projSpeed: 720,
+    path: 'dual', level: 5,
+    desc: '다섯 발 초고속 연사.'
+  },
 };
 
 // Upgrade map: which defs a tower can evolve into
 const UPGRADES = {
-  basic:   ['laser2', 'missile2', 'dual2'],
-  laser2:  ['laser3'],
-  missile2:['missile3'],
-  dual2:   ['dual3'],
-  laser3:  [],
-  missile3:[],
-  dual3:   [],
+  basic:    ['laser2', 'missile2', 'dual2'],
+  laser2:   ['laser3'],   laser3:   ['laser4'],   laser4:   ['laser5'],   laser5:   [],
+  missile2: ['missile3'], missile3: ['missile4'], missile4: ['missile5'], missile5: [],
+  dual2:    ['dual3'],    dual3:    ['dual4'],    dual4:    ['dual5'],    dual5:    [],
 };
 
 const ANT_KINDS = {
-  basic:    { hp: 14,  speed: 55, reward: 5,   r: 7,  color: '#2a1a0f', perWaveHp: 0.07 },
-  fast:     { hp:  9,  speed: 92, reward: 6,   r: 6,  color: '#3a2014', perWaveHp: 0.03 },
-  tank:     { hp: 46,  speed: 36, reward: 14,  r: 10, color: '#1a0a05', perWaveHp: 0.02 },
-  elite:    { hp: 90,  speed: 48, reward: 28,  r: 9,  color: '#4d1f0a', perWaveHp: 0.02 },
-  bossMini: { hp: 320, speed: 30, reward: 90,  r: 15, color: '#2d0a2a', perWaveHp: 0, isBoss: true, tier: 'mini' },
-  bossBig:  { hp: 780, speed: 22, reward: 260, r: 20, color: '#3d0810', perWaveHp: 0, isBoss: true, tier: 'big' },
+  basic:    { hp: 14,  speed: 55, reward: 6,   r: 7,  color: '#2a1a0f', perWaveHp: 0.05 },
+  fast:     { hp:  9,  speed: 92, reward: 7,   r: 6,  color: '#3a2014', perWaveHp: 0.03 },
+  tank:     { hp: 46,  speed: 36, reward: 18,  r: 10, color: '#1a0a05', perWaveHp: 0.02 },
+  elite:    { hp: 90,  speed: 48, reward: 36,  r: 9,  color: '#4d1f0a', perWaveHp: 0.02 },
+  bossMini: { hp: 320, speed: 30, reward: 120, r: 15, color: '#2d0a2a', perWaveHp: 0, isBoss: true, tier: 'mini' },
+  bossBig:  { hp: 780, speed: 22, reward: 360, r: 20, color: '#3d0810', perWaveHp: 0, isBoss: true, tier: 'big' },
 };
 
 // Wave composition: list of { kind, count, gap }
@@ -296,7 +331,7 @@ class Ant {
     const extra = 1 + (game.wave - 1) * (k.perWaveHp || 0);
     this.maxHp = Math.round(k.hp * waveHpMul * extra);
     this.hp = this.maxHp;
-    this.speed = k.speed * (1 + (game.wave - 1) * 0.01);
+    this.speed = k.speed * (1 + (game.wave - 1) * 0.015);
     this.reward = k.reward;
     this.r = k.r;
     this.color = k.color;
@@ -781,6 +816,18 @@ class Tower {
     const scale = 1 + this.placeAnim * 0.6;
     ctx.scale(scale, scale);
 
+    // power aura for L4/L5
+    if (d.level >= 4) {
+      const pulse = 0.7 + Math.sin(performance.now() / 320) * 0.3;
+      ctx.save();
+      ctx.globalAlpha = (d.level === 5 ? 0.28 : 0.18) * pulse;
+      ctx.fillStyle = d.color;
+      ctx.beginPath();
+      ctx.arc(0, 0, d.level === 5 ? 28 : 24, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
     // base plate
     ctx.shadowColor = 'rgba(0,0,0,0.5)';
     ctx.shadowBlur = 6;
@@ -901,7 +948,7 @@ class Game {
       return new Cake(x, y, i);
     });
 
-    this.credits = 150;
+    this.credits = 100;
     this.cakesLeft = this.cakes.length;
     this.towers = [];
     this.ants = [];
@@ -1102,11 +1149,13 @@ class Game {
   startWave() {
     if (this.wave >= WAVES.length) return;
     this.wave++;
-    // Piecewise HP scaling: gentle early, steep after wave 20.
+    // 4-step piecewise HP scaling: calm → build → hard → brutal.
     const w = this.wave;
-    this.waveHpMul = w <= 20
-      ? 1 + (w - 1) * 0.15
-      : 1 + 19 * 0.15 + (w - 20) * 0.28;
+    this.waveHpMul =
+      w <= 10 ? 1 + (w - 1) * 0.20 :
+      w <= 20 ? 2.80 + (w - 10) * 0.32 :
+      w <= 30 ? 6.00 + (w - 20) * 0.48 :
+                10.80 + (w - 30) * 0.80;
     this.spawnQueue = [];
     for (const group of WAVES[this.wave - 1]) {
       for (let i = 0; i < group.count; i++) {
