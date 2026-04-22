@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ant Cake Defense</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <div id="stage">
+      <canvas id="game" width="1440" height="840"></canvas>
+
+      <!-- Top HUD -->
+      <div id="hud">
+        <div class="hud-card">
+          <div class="hud-label">크레딧</div>
+          <div class="hud-value" id="hud-credits">
+            <span class="coin"></span><span id="credits-text">200</span>
+          </div>
+        </div>
+        <div class="hud-card">
+          <div class="hud-label">웨이브</div>
+          <div class="hud-value">
+            <span id="wave-text">1</span><span class="hud-sub">/ <span id="wave-max">40</span></span>
+          </div>
+        </div>
+        <div class="hud-card wide">
+          <div class="hud-label" id="wave-status-label">다음 웨이브까지</div>
+          <div class="wave-bar">
+            <div class="wave-bar-fill" id="wave-bar-fill"></div>
+          </div>
+        </div>
+        <div class="hud-card">
+          <div class="hud-label">남은 케이크</div>
+          <div class="hud-value cakes">
+            <span id="cakes-text">8</span><span class="hud-sub">/ 8</span>
+          </div>
+        </div>
+        <div class="hud-spacer"></div>
+        <div class="hud-buttons">
+          <button class="icon-btn" id="btn-speed" title="속도 전환">
+            <span id="speed-text">1x</span>
+          </button>
+          <button class="icon-btn" id="btn-pause" title="일시정지">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+          </button>
+          <button class="icon-btn" id="btn-restart" title="다시 시작">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Placement / Upgrade popup -->
+      <div id="popup" class="popup hidden">
+        <button class="popup-close" id="popup-close" title="닫기 (Esc)" aria-label="닫기">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6 L18 18 M18 6 L6 18"/></svg>
+        </button>
+        <div class="popup-arrow"></div>
+        <div class="popup-body" id="popup-body"></div>
+      </div>
+
+      <!-- Overlay screens -->
+      <div id="overlay" class="overlay hidden">
+        <div class="overlay-card">
+          <div class="overlay-title" id="overlay-title">게임 오버</div>
+          <div class="overlay-sub" id="overlay-sub">개미들이 케이크를 전부 가져갔습니다.</div>
+          <div class="overlay-stats" id="overlay-stats"></div>
+          <div class="overlay-actions">
+            <button class="primary-btn" id="overlay-restart">다시 도전</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Start screen -->
+      <div id="start-screen" class="overlay">
+        <div class="overlay-card">
+          <div class="logo">
+            <span class="logo-ant">🐜</span>
+            <div>
+              <div class="logo-title">ANT CAKE DEFENSE</div>
+              <div class="logo-sub">케이크를 지켜라</div>
+            </div>
+          </div>
+          <div class="rules">
+            <div class="rule"><b>목표</b> — 좌상단 구덩이에서 나오는 개미들이 우하단의 케이크 8조각을 모두 빼앗기 전에 격퇴하세요.</div>
+            <div class="rule"><b>건설</b> — 빈 칸을 클릭해 기본 타워를 설치합니다. 적을 처치하면 크레딧을 얻어요.</div>
+            <div class="rule"><b>진화</b> — 타워를 클릭하면 <span class="tag laser">레이저</span> / <span class="tag missile">미사일</span> / <span class="tag dual">2중탄</span> 중 하나를 선택해 Lv.2 → Lv.3로 강화할 수 있어요.</div>
+            <div class="rule"><b>조작</b> — <kbd>Space</kbd> 일시정지 · <kbd>F</kbd> 속도 전환 · <kbd>Esc</kbd> 선택 해제</div>
+          </div>
+          <div class="overlay-actions">
+            <button class="primary-btn" id="start-btn">시작하기</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
