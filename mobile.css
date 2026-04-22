@@ -10,9 +10,6 @@
 /* Rotation prompt element is in the DOM but hidden by default. */
 #rotate-prompt { display: none; }
 
-/* Stage-drag grip is desktop-hidden; shown inside the mobile media query. */
-#stage-grip { display: none; }
-
 /* ------------------------------------------------------------------ */
 /*  Mobile layout (phones + tablets + small windows)                   */
 /* ------------------------------------------------------------------ */
@@ -35,45 +32,17 @@
     max-height: calc(100dvh - 20px);
     box-shadow: var(--shadow-md);
     will-change: transform;
+    /* Pinch-zoom math assumes origin at top-left so tx/ty are plain viewport
+       offsets independent of scale. */
+    transform-origin: 0 0;
   }
 
-  /* Kill iOS double-tap zoom and native gestures on the game canvas. */
-  #game { touch-action: manipulation; }
+  /* `none` disables the browser's scroll/pinch/double-tap on the canvas so
+     our JS owns the gesture — tap vs swipe is disambiguated by distance. */
+  #game { touch-action: none; }
 
-  /* -- Stage grip: drag to reposition the whole board, no snapping --- */
-  #stage-grip {
-    position: fixed;
-    right: 10px;
-    bottom: 10px;
-    z-index: 60;
-    width: 46px;
-    height: 46px;
-    padding: 0;
-    border-radius: 14px;
-    border: 1px solid var(--panel-border-strong);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 247, 253, 0.92));
-    box-shadow: var(--shadow-md);
-    color: var(--text-dim);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: grab;
-    touch-action: none;
-    -webkit-tap-highlight-color: transparent;
-    transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
-  }
-
-  #stage-grip:active {
-    cursor: grabbing;
-    background: rgba(90, 134, 255, 0.18);
-    color: var(--accent);
-    transform: scale(0.96);
-  }
-
-  #stage-grip.dragging {
-    background: rgba(90, 134, 255, 0.22);
-    color: var(--accent);
-  }
+  /* Subtle lift while actively swiping the board. */
+  #stage.dragging { box-shadow: var(--shadow-lg); }
 
   /* -- HUD: tighter padding but bigger touch targets ----------------- */
   #hud {

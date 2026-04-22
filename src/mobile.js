@@ -40,106 +40,197 @@
 
   onReady(() => {
     ensureRotatePrompt();
-    ensureStageGrip();
+    installStageSwipe();
     guardCanvasGestures();
   });
 
   /**
-   * Free-form stage repositioning.
-   * The HUD buttons often get crowded against the screen edges on phones.
-   * A floating grip lets the player drag the whole stage to wherever feels
-   * comfortable — no snap back, no viewport clamp. Position persists.
+   * Gesture handling for the stage:
+   *   - 1 finger  → pan (translate). Tap-to-place still fires when movement
+   *                  stays under DRAG_THRESHOLD.
+   *   - 2 fingers → pinch-zoom. The stage-local point under the pinch
+   *                  midpoint stays anchored as scale changes, so the board
+   *                  zooms around the fingers rather than the top-left.
+   * Transform uses `transform-origin: 0 0` (set in CSS) so tx/ty are plain
+   * viewport pixel offsets regardless of scale. Free-form — no snap, no
+   * viewport clamp. Scale clamps only to keep the layout usable. Persisted.
    */
-  const STORAGE_KEY = 'acd.stage-offset';
-  let gripDrag = null;
+  const STORAGE_KEY = 'acd.stage-transform';
+  const DRAG_THRESHOLD = 10;  // viewport pixels — below this, a tap still fires
+  const MIN_SCALE = 0.5;
+  const MAX_SCALE = 3;
+
+  let gesture = null;
+  let current = { tx: 0, ty: 0, scale: 1 };
 
   function getStage() { return document.getElementById('stage'); }
 
-  function loadOffset() {
+  function clampScale(s) { return Math.max(MIN_SCALE, Math.min(MAX_SCALE, s)); }
+
+  function loadTransform() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return { x: 0, y: 0 };
+      if (!raw) return { tx: 0, ty: 0, scale: 1 };
       const v = JSON.parse(raw);
-      return { x: Number(v.x) || 0, y: Number(v.y) || 0 };
-    } catch { return { x: 0, y: 0 }; }
+      return {
+        tx: Number(v.tx) || 0,
+        ty: Number(v.ty) || 0,
+        scale: clampScale(Number(v.scale) || 1),
+      };
+    } catch { return { tx: 0, ty: 0, scale: 1 }; }
   }
 
-  function saveOffset(x, y) {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ x, y })); } catch {}
+  function saveTransform(t) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(t)); } catch {}
   }
 
-  function applyOffset(x, y) {
+  function applyTransform(t) {
     const stage = getStage();
     if (!stage) return;
-    stage.style.transform = (x || y) ? `translate(${x}px, ${y}px)` : '';
+    const identity = t.tx === 0 && t.ty === 0 && t.scale === 1;
+    stage.style.transform = identity
+      ? ''
+      : `translate(${t.tx}px, ${t.ty}px) scale(${t.scale})`;
   }
 
-  function ensureStageGrip() {
-    if (document.getElementById('stage-grip')) return;
-    const btn = document.createElement('button');
-    btn.id = 'stage-grip';
-    btn.type = 'button';
-    btn.setAttribute('aria-label', '게임 화면 이동 (더블탭으로 원위치)');
-    btn.title = '드래그하여 이동 · 더블탭으로 원위치';
-    btn.innerHTML = `
-      <svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor" aria-hidden="true">
-        <circle cx="6" cy="5" r="1.5"/><circle cx="10" cy="5" r="1.5"/><circle cx="14" cy="5" r="1.5"/>
-        <circle cx="6" cy="10" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="14" cy="10" r="1.5"/>
-        <circle cx="6" cy="15" r="1.5"/><circle cx="10" cy="15" r="1.5"/><circle cx="14" cy="15" r="1.5"/>
-      </svg>`;
-    document.body.appendChild(btn);
-
-    const initial = loadOffset();
-    applyOffset(initial.x, initial.y);
-
-    btn.addEventListener('pointerdown', onGripDown);
-    btn.addEventListener('dblclick', (e) => {
-      e.preventDefault();
-      applyOffset(0, 0);
-      saveOffset(0, 0);
-    });
+  function setTransform(t) {
+    current = t;
+    applyTransform(t);
   }
 
-  function onGripDown(e) {
-    if (e.button !== undefined && e.button !== 0) return;
-    e.preventDefault();
-    const btn = e.currentTarget;
-    const base = loadOffset();
-    gripDrag = {
-      id: e.pointerId,
-      startX: e.clientX,
-      startY: e.clientY,
-      baseX: base.x,
-      baseY: base.y,
-      moved: false,
+  // Don't hijack taps on HUD buttons, popup/overlay controls, etc.
+  function isInteractiveTarget(t) {
+    return !!(t && t.closest && t.closest(
+      'button, a, input, select, textarea, .popup, .overlay-card, #start-screen'
+    ));
+  }
+
+  function findTouch(list, id) {
+    for (const t of list) if (t.identifier === id) return t;
+    return null;
+  }
+
+  /**
+   * Build a fresh gesture baseline from the current touch set. Called on
+   * every touch count change so ongoing gestures pick up cleanly when a
+   * second finger lands mid-pan, or one lifts mid-pinch.
+   */
+  function snapshot(touches) {
+    if (touches.length === 0) return null;
+    if (touches.length === 1) {
+      const t = touches[0];
+      return {
+        mode: 'pan',
+        id: t.identifier,
+        startX: t.clientX, startY: t.clientY,
+        baseTx: current.tx, baseTy: current.ty, baseScale: current.scale,
+        dragging: false,
+      };
+    }
+    const a = touches[0], b = touches[1];
+    const dist = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY) || 1;
+    const midX = (a.clientX + b.clientX) / 2;
+    const midY = (a.clientY + b.clientY) / 2;
+    const rect = getStage().getBoundingClientRect();
+    return {
+      mode: 'pinch',
+      ida: a.identifier, idb: b.identifier,
+      startDist: dist,
+      startMidX: midX, startMidY: midY,
+      startScale: current.scale,
+      baseTx: current.tx, baseTy: current.ty,
+      // Natural (pre-transform) top-left of the stage in viewport coords —
+      // held constant through the gesture so anchoring math stays stable.
+      natLeft: rect.left - current.tx,
+      natTop:  rect.top  - current.ty,
     };
-    btn.classList.add('dragging');
-    try { btn.setPointerCapture(e.pointerId); } catch {}
-    btn.addEventListener('pointermove', onGripMove);
-    btn.addEventListener('pointerup', onGripUp);
-    btn.addEventListener('pointercancel', onGripUp);
   }
 
-  function onGripMove(e) {
-    if (!gripDrag || e.pointerId !== gripDrag.id) return;
-    const dx = e.clientX - gripDrag.startX;
-    const dy = e.clientY - gripDrag.startY;
-    if (!gripDrag.moved && Math.hypot(dx, dy) > 2) gripDrag.moved = true;
-    applyOffset(gripDrag.baseX + dx, gripDrag.baseY + dy);
+  function installStageSwipe() {
+    const stage = getStage();
+    if (!stage) return;
+
+    current = loadTransform();
+    applyTransform(current);
+
+    stage.addEventListener('touchstart',  onTouchStart,  { passive: true  });
+    stage.addEventListener('touchmove',   onTouchMove,   { passive: false });
+    stage.addEventListener('touchend',    onTouchEnd,    { passive: false });
+    stage.addEventListener('touchcancel', onTouchCancel, { passive: true  });
   }
 
-  function onGripUp(e) {
-    if (!gripDrag || e.pointerId !== gripDrag.id) return;
-    const btn = e.currentTarget;
-    const dx = e.clientX - gripDrag.startX;
-    const dy = e.clientY - gripDrag.startY;
-    if (gripDrag.moved) saveOffset(gripDrag.baseX + dx, gripDrag.baseY + dy);
-    btn.classList.remove('dragging');
-    try { btn.releasePointerCapture?.(e.pointerId); } catch {}
-    btn.removeEventListener('pointermove', onGripMove);
-    btn.removeEventListener('pointerup', onGripUp);
-    btn.removeEventListener('pointercancel', onGripUp);
-    gripDrag = null;
+  function onTouchStart(e) {
+    if (!gesture && isInteractiveTarget(e.target)) { gesture = null; return; }
+    gesture = snapshot(e.touches);
+    if (gesture?.mode === 'pinch') getStage()?.classList.add('dragging');
+  }
+
+  function onTouchMove(e) {
+    if (!gesture) return;
+
+    if (gesture.mode === 'pan') {
+      const t = findTouch(e.touches, gesture.id);
+      if (!t) return;
+      const dx = t.clientX - gesture.startX;
+      const dy = t.clientY - gesture.startY;
+      if (!gesture.dragging) {
+        if (Math.hypot(dx, dy) < DRAG_THRESHOLD) return;
+        gesture.dragging = true;
+        getStage()?.classList.add('dragging');
+      }
+      e.preventDefault();
+      setTransform({
+        tx: gesture.baseTx + dx,
+        ty: gesture.baseTy + dy,
+        scale: gesture.baseScale,
+      });
+      return;
+    }
+
+    // Pinch mode
+    const a = findTouch(e.touches, gesture.ida);
+    const b = findTouch(e.touches, gesture.idb);
+    if (!a || !b) return;
+    e.preventDefault();
+
+    const dist = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY) || 1;
+    const midX = (a.clientX + b.clientX) / 2;
+    const midY = (a.clientY + b.clientY) / 2;
+    const scale = clampScale(gesture.startScale * (dist / gesture.startDist));
+
+    // Keep the stage-local point that was under the pinch center anchored
+    // to the current midpoint as scale and midpoint shift together.
+    const ratio = scale / gesture.startScale;
+    const tx = midX - gesture.natLeft - ratio * (gesture.startMidX - gesture.natLeft - gesture.baseTx);
+    const ty = midY - gesture.natTop  - ratio * (gesture.startMidY - gesture.natTop  - gesture.baseTy);
+
+    setTransform({ tx, ty, scale });
+  }
+
+  function onTouchEnd(e) {
+    if (!gesture) return;
+    const wasDrag = gesture.mode === 'pinch' || gesture.dragging === true;
+    if (wasDrag) {
+      // Suppress the synthesized mousedown/click so the gesture end doesn't
+      // land on the canvas as a tap.
+      e.preventDefault();
+      saveTransform(current);
+    }
+    if (e.touches.length > 0) {
+      // Re-baseline with the remaining touch(es) so pinch→pan / pan→pinch
+      // transitions stay smooth.
+      gesture = snapshot(e.touches);
+      if (gesture?.mode === 'pinch') getStage()?.classList.add('dragging');
+      else getStage()?.classList.remove('dragging');
+    } else {
+      getStage()?.classList.remove('dragging');
+      gesture = null;
+    }
+  }
+
+  function onTouchCancel() {
+    getStage()?.classList.remove('dragging');
+    gesture = null;
   }
 
   /**
