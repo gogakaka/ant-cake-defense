@@ -38,10 +38,9 @@ class MinHeap {
   get size() { return this.a.length; }
 }
 
-// 4-connected A* on a CELL.* grid. TOWER blocks; everything else walks.
+// 4-connected A* on a CELL.* grid. All cells are walkable — towers let ants pass through.
 function findPath(grid, sx, sy, tx, ty) {
   if (!inBounds(sx, sy) || !inBounds(tx, ty)) return null;
-  if (grid[ty][tx] === CELL.TOWER) return null;
 
   const open = new MinHeap();
   const gScore = new Map();
@@ -74,7 +73,6 @@ function findPath(grid, sx, sy, tx, ty) {
     for (const [dx, dy] of dirs) {
       const nx = cur.x + dx, ny = cur.y + dy;
       if (!inBounds(nx, ny)) continue;
-      if (grid[ny][nx] === CELL.TOWER) continue;
       const nk = cellKey(nx, ny);
       if (closed.has(nk)) continue;
       const tentative = cur.g + 1;

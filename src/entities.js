@@ -29,7 +29,9 @@ class Ant {
     this.pathDirty = true;
     this.legPhase = Math.random() * Math.PI * 2;
     this.dead = false;
-    this.slow = 0;
+    this.slowFactor = 1;       // current speed multiplier (<1 = slower)
+    this.slowTimer = 0;        // linger time after leaving an ice aura
+    this._frameSlowFactor = 1; // reset each frame by Game.tick; towers set min
     this.flashHit = 0;
   }
 
@@ -89,7 +91,16 @@ class Ant {
     const d = Math.hypot(dx, dy);
     let spd = this.speed;
     if (this.carrying) spd *= 0.75;
-    if (this.slow > 0) { spd *= 0.55; this.slow -= dt; }
+    // Slow: ice aura towers set _frameSlowFactor each frame. Linger after exit.
+    if (this._frameSlowFactor < 1) {
+      this.slowFactor = this._frameSlowFactor;
+      this.slowTimer = 0.3;
+    }
+    if (this.slowTimer > 0) {
+      spd *= this.slowFactor;
+      this.slowTimer -= dt;
+      if (this.slowTimer <= 0) { this.slowFactor = 1; this.slowTimer = 0; }
+    }
     const step = spd * dt;
 
     if (d <= step) {
@@ -413,6 +424,44 @@ class Tower {
     this.beamTimer = Math.max(0, this.beamTimer - dt);
     this.placeAnim = Math.max(0, this.placeAnim - dt * 3);
 
+    const d = this.def;
+
+    // Bank tower: passive credit generation.
+    if (d.bank) {
+      this.bankAccum = (this.bankAccum || 0) + d.bankRate * dt;
+      if (this.bankAccum >= 1) {
+        const whole = Math.floor(this.bankAccum);
+        game.credits += whole;
+        this.bankAccum -= whole;
+      }
+      return;
+    }
+
+    // Aura (support/buff) tower: no firing. Buff calculated externally by getBuffAt.
+    if (d.support) return;
+
+    // Ice / flame aura: tick damage + optional slow within range.
+    if (d.aura) {
+      const buff = game.getBuffAt(this.x, this.y);
+      const dmgPerSec = d.damage * buff.dmg;
+      const r2 = this.rangePx * this.rangePx;
+      for (const a of game.ants) {
+        if (a.dead) continue;
+        if (dist2(this.x, this.y, a.x, a.y) > r2) continue;
+        if (d.slowFactor < 1 && d.slowFactor < a._frameSlowFactor) {
+          a._frameSlowFactor = d.slowFactor;
+        }
+        a.hp -= dmgPerSec * dt;
+        a.flashHit = Math.max(a.flashHit, 0.25);
+        if (a.hp <= 0 && !a.dead) {
+          a.dead = true;
+          game.onAntKilled(a);
+        }
+      }
+      return;
+    }
+
+    // Projectile / beam / dual — classic tower
     const target = this.findTarget(game);
     if (!target) { this.beamTarget = null; this.chainSegments = []; return; }
 
@@ -420,16 +469,18 @@ class Tower {
     this.aim = lerpAngle(this.aim, desiredAim, clamp(dt * 14, 0, 1));
 
     if (this.cooldown <= 0) {
-      this.fire(game, target);
-      this.cooldown = 1 / this.def.fireRate;
+      const buff = game.getBuffAt(this.x, this.y);
+      this.fire(game, target, buff);
+      this.cooldown = 1 / (d.fireRate * buff.rate);
       this.flash = 1;
     }
   }
 
-  fire(game, target) {
+  fire(game, target, buff = { dmg: 1, rate: 1 }) {
     const d = this.def;
+    const dmg = d.damage * buff.dmg;
     if (d.beam) {
-      target.damage(d.damage, game);
+      target.damage(dmg, game);
       this.beamTarget = target;
       this.beamTimer = 0.08;
       this.chainSegments = [];
@@ -445,14 +496,14 @@ class Tower {
             if (dd < cr2 && dd < nd) { next = a; nd = dd; }
           }
           if (!next) break;
-          next.damage(d.damage * 0.7, game);
+          next.damage(dmg * 0.7, game);
           this.chainSegments.push({ a: last, b: next });
           chained.add(next);
           last = next;
         }
       }
     } else if (d.splash) {
-      game.projectiles.push(new Projectile(this.x, this.y, target, d.damage, d.projSpeed, {
+      game.projectiles.push(new Projectile(this.x, this.y, target, dmg, d.projSpeed, {
         splash: d.splash * GRID.CELL, color: d.color,
       }));
     } else {
@@ -462,7 +513,7 @@ class Tower {
         const nx = Math.cos(this.aim + Math.PI/2);
         const ny = Math.sin(this.aim + Math.PI/2);
         game.projectiles.push(new Projectile(
-          this.x + nx * off, this.y + ny * off, target, d.damage, d.projSpeed, { color: d.color }
+          this.x + nx * off, this.y + ny * off, target, dmg, d.projSpeed, { color: d.color }
         ));
       }
     }
@@ -478,8 +529,28 @@ class Tower {
 
   draw(ctx, selected, hovered) {
     const d = this.def;
-    // range ring
-    if (selected || hovered) {
+
+    // Persistent aura visualization for ice/flame (faint pulsing ring at range)
+    if (d.aura && this.rangePx > 0) {
+      const pulse = 0.75 + Math.sin(performance.now() / 500) * 0.25;
+      ctx.save();
+      ctx.globalAlpha = 0.09 * pulse;
+      ctx.fillStyle = d.color;
+      ctx.beginPath(); ctx.arc(this.x, this.y, this.rangePx, 0, Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
+    // Persistent faint aura for support (buff reach)
+    if (d.support && this.rangePx > 0) {
+      const pulse = 0.75 + Math.sin(performance.now() / 600) * 0.25;
+      ctx.save();
+      ctx.globalAlpha = 0.08 * pulse;
+      ctx.fillStyle = d.color;
+      ctx.beginPath(); ctx.arc(this.x, this.y, this.rangePx, 0, Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
+
+    // range ring when selected/hovered (skip bank which has no range)
+    if ((selected || hovered) && this.rangePx > 0) {
       ctx.save();
       ctx.strokeStyle = d.color + 'aa';
       ctx.fillStyle = d.color + '18';
@@ -523,8 +594,9 @@ class Tower {
       ctx.fillRect(-13 + i * 5, -14, 3, 3);
     }
 
-    // turret (per-path body)
-    ctx.rotate(this.aim);
+    // Aiming turrets rotate. Aura/support/bank towers don't.
+    const rotates = !d.aura && !d.support && !d.bank;
+    if (rotates) ctx.rotate(this.aim);
     if (this.flash > 0) {
       ctx.shadowColor = d.color;
       ctx.shadowBlur = 14 * this.flash;
@@ -544,18 +616,80 @@ class Tower {
       roundRect(ctx, -5, -9, 20, 5, 2); ctx.fill();
       roundRect(ctx, -5,  4, 20, 5, 2); ctx.fill();
     } else if (d.path === 'sniper') {
-      // compact body
       roundRect(ctx, -8, -5, 10, 10, 2); ctx.fill();
-      // long thin barrel
       ctx.fillRect(2, -2, 22, 4);
-      // muzzle tip
       ctx.fillStyle = '#1b1f38';
       ctx.fillRect(22, -2, 2, 4);
-      // scope bump on top of body
       ctx.fillStyle = d.color;
       ctx.beginPath(); ctx.arc(-3, -6, 2.8, 0, Math.PI*2); ctx.fill();
       ctx.fillStyle = '#fff';
       ctx.beginPath(); ctx.arc(-3, -6, 1.3, 0, Math.PI*2); ctx.fill();
+    } else if (d.path === 'ice') {
+      // snowflake: hex body + 6 radiating arms
+      ctx.strokeStyle = d.color;
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      for (let i = 0; i < 6; i++) {
+        const a = (i / 6) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(Math.cos(a) * 11, Math.sin(a) * 11);
+        ctx.stroke();
+      }
+      // core
+      ctx.fillStyle = d.color;
+      ctx.beginPath(); ctx.arc(0, 0, 5, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(0, 0, 2, 0, Math.PI*2); ctx.fill();
+    } else if (d.path === 'flame') {
+      // flame blob with wavy top
+      ctx.fillStyle = d.color;
+      ctx.beginPath();
+      ctx.moveTo(-8, 6);
+      ctx.quadraticCurveTo(-11, -4, -3, -5);
+      ctx.quadraticCurveTo(-2, -10, 2, -7);
+      ctx.quadraticCurveTo(6, -12, 6, -4);
+      ctx.quadraticCurveTo(11, -3, 8, 6);
+      ctx.closePath();
+      ctx.fill();
+      // inner flame
+      ctx.fillStyle = '#ffd966';
+      ctx.beginPath();
+      ctx.moveTo(-3, 4);
+      ctx.quadraticCurveTo(-4, -2, 0, -4);
+      ctx.quadraticCurveTo(4, -2, 3, 4);
+      ctx.closePath();
+      ctx.fill();
+    } else if (d.path === 'aura') {
+      // support: static core + slowly rotating orbital ring
+      ctx.save();
+      ctx.rotate(performance.now() / 900);
+      ctx.strokeStyle = d.color;
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(0, 0, 12, 0, Math.PI * 1.4); ctx.stroke();
+      ctx.beginPath(); ctx.arc(0, 0, 12, Math.PI * 1.6, Math.PI * 1.95); ctx.stroke();
+      ctx.restore();
+      ctx.fillStyle = d.color;
+      ctx.beginPath(); ctx.arc(0, 0, 7, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(0, 0, 3, 0, Math.PI*2); ctx.fill();
+    } else if (d.path === 'bank') {
+      // stack of coins
+      ctx.fillStyle = d.color;
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        ctx.ellipse(0, 6 - i * 5, 10, 3, 0, 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.fillStyle = '#fff8c0';
+      ctx.beginPath();
+      ctx.ellipse(0, -4, 10, 3, 0, 0, Math.PI*2);
+      ctx.fill();
+      ctx.fillStyle = d.color;
+      ctx.font = 'bold 9px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('$', 0, -4);
     } else {
       roundRect(ctx, -6, -5, 20, 10, 3); ctx.fill();
     }

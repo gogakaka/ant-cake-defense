@@ -157,36 +157,20 @@ class Game {
   }
 
   testPlacement(gx, gy) {
-    const prev = this.grid[gy][gx];
-    this.grid[gy][gx] = CELL.TOWER;
-    let ok = true;
-    const nest = NEST_CELLS[0];
-    for (const cake of this.cakes) {
-      if (cake.taken) continue;
-      const p1 = findPath(this.grid, nest[0], nest[1], cake.gx, cake.gy);
-      if (!p1) { ok = false; break; }
+    // Towers no longer block pathing — ants pass through. Only check cell is empty.
+    return inBounds(gx, gy) && this.grid[gy]?.[gx] === CELL.EMPTY;
+  }
+
+  getBuffAt(x, y) {
+    let dmg = 1, rate = 1;
+    for (const t of this.towers) {
+      if (!t.def.support) continue;
+      const r2 = t.rangePx * t.rangePx;
+      if (dist2(t.x, t.y, x, y) > r2) continue;
+      dmg += t.def.buffDmg || 0;
+      rate += t.def.buffRate || 0;
     }
-    if (ok) {
-      for (const ant of this.ants) {
-        if (ant.dead) continue;
-        const sg = worldToGrid(ant.x, ant.y);
-        sg.gx = clamp(sg.gx, 0, GRID.COLS-1);
-        sg.gy = clamp(sg.gy, 0, GRID.ROWS-1);
-        if (sg.gx === gx && sg.gy === gy) { ok = false; break; }
-        let target;
-        if (ant.state === 'seeking') {
-          const c = ant.targetCake && !ant.targetCake.taken ? ant.targetCake : this.cakes.find(c => !c.taken);
-          if (!c) continue;
-          target = [c.gx, c.gy];
-        } else {
-          target = NEST_CELLS[0];
-        }
-        const p = findPath(this.grid, sg.gx, sg.gy, target[0], target[1]);
-        if (!p) { ok = false; break; }
-      }
-    }
-    this.grid[gy][gx] = prev;
-    return ok;
+    return { dmg, rate };
   }
 
   tryUpgrade(tower, toKey) {
@@ -221,10 +205,13 @@ class Game {
     this.wave++;
     const w = this.wave;
     this.waveHpMul =
-      w <= 10 ? 1 + (w - 1) * 0.24 :
-      w <= 20 ? 3.16 + (w - 10) * 0.42 :
-      w <= 30 ? 7.36 + (w - 20) * 0.65 :
-                13.86 + (w - 30) * 1.10;
+      w <= 10 ? 1 + (w - 1) * 0.26 :
+      w <= 20 ? 3.34 + (w - 10) * 0.46 :
+      w <= 30 ? 7.94 + (w - 20) * 0.72 :
+      w <= 40 ? 15.14 + (w - 30) * 1.20 :
+      w <= 50 ? 27.14 + (w - 40) * 1.75 :
+      w <= 60 ? 44.64 + (w - 50) * 2.50 :
+                69.64 + (w - 60) * 3.50;
     this.spawnQueue = [];
     for (const group of WAVES[this.wave - 1]) {
       for (let i = 0; i < group.count; i++) {
@@ -366,6 +353,8 @@ class Game {
     if (!this.gameOver && dt > 0) {
       this.stats.time += dt;
       this.waveUpdate(dt);
+      // Reset per-frame slow tracker before ice/flame auras re-apply it.
+      for (const a of this.ants) a._frameSlowFactor = 1;
       for (const t of this.towers) t.update(dt, this);
       for (const a of this.ants) a.update(dt);
       for (const p of this.projectiles) p.update(dt, this);
@@ -656,16 +645,44 @@ class Game {
     const d = tower.def;
 
     const upgrades = UPGRADES[tower.defKey];
-    const statsHtml = `
-      <div class="tower-stats">
+    const statsHtml = (() => {
+      if (d.bank) {
+        return `<div class="tower-stats">
+          <div class="tower-stat"><div class="stat-label">초당 생산</div><div class="stat-value">+${d.bankRate}</div></div>
+        </div>`;
+      }
+      if (d.support) {
+        return `<div class="tower-stats">
+          <div class="tower-stat"><div class="stat-label">데미지 증폭</div><div class="stat-value">+${Math.round(d.buffDmg*100)}%</div></div>
+          <div class="tower-stat"><div class="stat-label">연사 증폭</div><div class="stat-value">+${Math.round(d.buffRate*100)}%</div></div>
+          <div class="tower-stat"><div class="stat-label">사거리</div><div class="stat-value">${d.range.toFixed(1)}</div></div>
+        </div>`;
+      }
+      if (d.aura) {
+        const slowCell = d.slowFactor < 1
+          ? `<div class="tower-stat"><div class="stat-label">둔화</div><div class="stat-value">${Math.round((1-d.slowFactor)*100)}%</div></div>`
+          : '';
+        return `<div class="tower-stats">
+          <div class="tower-stat"><div class="stat-label">초당 딜</div><div class="stat-value">${d.damage}</div></div>
+          <div class="tower-stat"><div class="stat-label">사거리</div><div class="stat-value">${d.range.toFixed(1)}</div></div>
+          ${slowCell}
+        </div>`;
+      }
+      return `<div class="tower-stats">
         <div class="tower-stat"><div class="stat-label">데미지</div><div class="stat-value">${d.damage}${d.shots ? '×'+d.shots : ''}</div></div>
         <div class="tower-stat"><div class="stat-label">사거리</div><div class="stat-value">${d.range.toFixed(1)}</div></div>
         <div class="tower-stat"><div class="stat-label">연사</div><div class="stat-value">${d.fireRate.toFixed(1)}</div></div>
       </div>`;
+    })();
 
     let upgradeHtml = '';
     if (upgrades.length) {
-      const rowClass = upgrades.length >= 4 ? 'upgrade-row row-2x2' : 'upgrade-row';
+      const c = upgrades.length;
+      const rowClass =
+        c >= 7 ? 'upgrade-row row-4x2' :
+        c >= 5 ? 'upgrade-row row-3x2' :
+        c >= 4 ? 'upgrade-row row-2x2' :
+                 'upgrade-row';
       upgradeHtml = `<div class="${rowClass}">`;
       for (const upKey of upgrades) {
         const up = TOWER_DEFS[upKey];

@@ -324,7 +324,17 @@ html, body {
 
 .upgrade-row.row-2x2 {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(120px, 1fr));
+}
+
+.upgrade-row.row-3x2 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(115px, 1fr));
+}
+
+.upgrade-row.row-4x2 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(110px, 1fr));
 }
 
 .upgrade-btn {
@@ -359,6 +369,10 @@ html, body {
 .upgrade-btn.missile:hover:not(:disabled) { border-color: var(--orange); box-shadow: 0 6px 16px rgba(255,164,82,0.3);}
 .upgrade-btn.dual:hover:not(:disabled) { border-color: var(--green); box-shadow: 0 6px 16px rgba(94,230,168,0.3);}
 .upgrade-btn.sniper:hover:not(:disabled) { border-color: #3d9cd8; box-shadow: 0 6px 16px rgba(61,156,216,0.3);}
+.upgrade-btn.ice:hover:not(:disabled) { border-color: #68bde4; box-shadow: 0 6px 16px rgba(104,189,228,0.3);}
+.upgrade-btn.flame:hover:not(:disabled) { border-color: #ff5a16; box-shadow: 0 6px 16px rgba(255,90,22,0.3);}
+.upgrade-btn.aura:hover:not(:disabled) { border-color: #ffc831; box-shadow: 0 6px 16px rgba(255,200,49,0.3);}
+.upgrade-btn.bank:hover:not(:disabled) { border-color: #f5b200; box-shadow: 0 6px 16px rgba(245,178,0,0.3);}
 
 .upgrade-btn .u-title {
   display: flex;
@@ -519,6 +533,10 @@ html, body {
 .tag.missile { background: rgba(255,164,82,0.18); color: var(--orange); }
 .tag.dual    { background: rgba(94,230,168,0.18); color: var(--green); }
 .tag.sniper  { background: rgba(61,156,216,0.18); color: #1e63d0; }
+.tag.ice     { background: rgba(104,189,228,0.2); color: #1e6ed4; }
+.tag.flame   { background: rgba(255,90,22,0.18); color: #b81018; }
+.tag.aura    { background: rgba(255,200,49,0.22); color: #a86d00; }
+.tag.bank    { background: rgba(245,178,0,0.22); color: #7a4c00; }
 
 kbd {
   display: inline-block;

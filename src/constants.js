@@ -151,15 +151,119 @@ const TOWER_DEFS = {
     path: 'sniper', level: 5,
     desc: '맵 대각선 끝까지 닿는 광속 포격.'
   },
+  // Ice path — passive AOE slow + weak tick damage. No projectiles.
+  ice2: {
+    key: 'ice2', name: '얼음 Lv.2', icon: '❄', color: '#a7d8ea',
+    cost: 100, damage: 3, range: 2.6, fireRate: 0, projSpeed: 0,
+    path: 'ice', level: 2, aura: true, slowFactor: 0.7,
+    desc: '주변 적 30% 둔화 + 초당 약한 피해.'
+  },
+  ice3: {
+    key: 'ice3', name: '서리 Lv.3', icon: '❄', color: '#68bde4',
+    cost: 200, damage: 5, range: 2.9, fireRate: 0, projSpeed: 0,
+    path: 'ice', level: 3, aura: true, slowFactor: 0.55,
+    desc: '45% 둔화 + 지속 피해 증가.'
+  },
+  ice4: {
+    key: 'ice4', name: '빙결 Lv.4', icon: '❄', color: '#3b9ade',
+    cost: 400, damage: 8, range: 3.2, fireRate: 0, projSpeed: 0,
+    path: 'ice', level: 4, aura: true, slowFactor: 0.4,
+    desc: '60% 둔화 · 넓은 범위.'
+  },
+  ice5: {
+    key: 'ice5', name: '절대영도 Lv.5', icon: '❄', color: '#1e6ed4',
+    cost: 700, damage: 12, range: 3.7, fireRate: 0, projSpeed: 0,
+    path: 'ice', level: 5, aura: true, slowFactor: 0.28,
+    desc: '72% 둔화 · 얼어붙을 지경.'
+  },
+  // Aura path — support. No damage. Boosts nearby towers.
+  aura2: {
+    key: 'aura2', name: '지휘소 Lv.2', icon: '✺', color: '#ffdb66',
+    cost: 100, damage: 0, range: 2.6, fireRate: 0,
+    path: 'aura', level: 2, support: true, buffDmg: 0.12, buffRate: 0.12,
+    desc: '주변 타워 데미지·연사 +12%.'
+  },
+  aura3: {
+    key: 'aura3', name: '지휘본부 Lv.3', icon: '✺', color: '#ffc831',
+    cost: 200, damage: 0, range: 2.9, fireRate: 0,
+    path: 'aura', level: 3, support: true, buffDmg: 0.22, buffRate: 0.22,
+    desc: '주변 타워 데미지·연사 +22%.'
+  },
+  aura4: {
+    key: 'aura4', name: '전략기지 Lv.4', icon: '✺', color: '#f5a200',
+    cost: 400, damage: 0, range: 3.2, fireRate: 0,
+    path: 'aura', level: 4, support: true, buffDmg: 0.32, buffRate: 0.32,
+    desc: '주변 타워 데미지·연사 +32%.'
+  },
+  aura5: {
+    key: 'aura5', name: '최고사령부 Lv.5', icon: '✺', color: '#e67400',
+    cost: 700, damage: 0, range: 3.5, fireRate: 0,
+    path: 'aura', level: 5, support: true, buffDmg: 0.48, buffRate: 0.48,
+    desc: '주변 타워 데미지·연사 +48%.'
+  },
+  // Flame path — very short range, very high tick damage, no slow.
+  flame2: {
+    key: 'flame2', name: '화염 Lv.2', icon: '🔥', color: '#ff8240',
+    cost: 100, damage: 18, range: 1.8, fireRate: 0, projSpeed: 0,
+    path: 'flame', level: 2, aura: true, slowFactor: 1,
+    desc: '짧은 사거리 · 초당 강력한 피해.'
+  },
+  flame3: {
+    key: 'flame3', name: '불꽃 Lv.3', icon: '🔥', color: '#ff5a16',
+    cost: 200, damage: 36, range: 2.0, fireRate: 0, projSpeed: 0,
+    path: 'flame', level: 3, aura: true, slowFactor: 1,
+    desc: '더 뜨거운 화염.'
+  },
+  flame4: {
+    key: 'flame4', name: '용광로 Lv.4', icon: '🔥', color: '#e03818',
+    cost: 400, damage: 66, range: 2.2, fireRate: 0, projSpeed: 0,
+    path: 'flame', level: 4, aura: true, slowFactor: 1,
+    desc: '근거리 광역 섬멸.'
+  },
+  flame5: {
+    key: 'flame5', name: '지옥불 Lv.5', icon: '🔥', color: '#b81018',
+    cost: 700, damage: 120, range: 2.5, fireRate: 0, projSpeed: 0,
+    path: 'flame', level: 5, aura: true, slowFactor: 1,
+    desc: '지나가는 모든 것을 태움.'
+  },
+  // Bank path — no attack, passively generates credits.
+  bank2: {
+    key: 'bank2', name: '금광 Lv.2', icon: '💰', color: '#ffd860',
+    cost: 100, damage: 0, range: 0, fireRate: 0,
+    path: 'bank', level: 2, bank: true, bankRate: 1.0,
+    desc: '초당 +1 크레딧 자동 생성.'
+  },
+  bank3: {
+    key: 'bank3', name: '금고 Lv.3', icon: '💰', color: '#f5b200',
+    cost: 200, damage: 0, range: 0, fireRate: 0,
+    path: 'bank', level: 3, bank: true, bankRate: 2.5,
+    desc: '초당 +2.5 크레딧.'
+  },
+  bank4: {
+    key: 'bank4', name: '조폐국 Lv.4', icon: '💰', color: '#e08800',
+    cost: 400, damage: 0, range: 0, fireRate: 0,
+    path: 'bank', level: 4, bank: true, bankRate: 5.0,
+    desc: '초당 +5 크레딧.'
+  },
+  bank5: {
+    key: 'bank5', name: '왕립조폐국 Lv.5', icon: '💰', color: '#c06000',
+    cost: 700, damage: 0, range: 0, fireRate: 0,
+    path: 'bank', level: 5, bank: true, bankRate: 9.0,
+    desc: '초당 +9 크레딧.'
+  },
 };
 
 // Upgrade map: which defs a tower can evolve into
 const UPGRADES = {
-  basic:    ['laser2', 'missile2', 'dual2', 'sniper2'],
+  basic:    ['laser2', 'missile2', 'dual2', 'sniper2', 'ice2', 'flame2', 'aura2', 'bank2'],
   laser2:   ['laser3'],   laser3:   ['laser4'],   laser4:   ['laser5'],   laser5:   [],
   missile2: ['missile3'], missile3: ['missile4'], missile4: ['missile5'], missile5: [],
   dual2:    ['dual3'],    dual3:    ['dual4'],    dual4:    ['dual5'],    dual5:    [],
   sniper2:  ['sniper3'],  sniper3:  ['sniper4'],  sniper4:  ['sniper5'],  sniper5:  [],
+  ice2:     ['ice3'],     ice3:     ['ice4'],     ice4:     ['ice5'],     ice5:     [],
+  flame2:   ['flame3'],   flame3:   ['flame4'],   flame4:   ['flame5'],   flame5:   [],
+  aura2:    ['aura3'],    aura3:    ['aura4'],    aura4:    ['aura5'],    aura5:    [],
+  bank2:    ['bank3'],    bank3:    ['bank4'],    bank4:    ['bank5'],    bank5:    [],
 };
 
 // ============================================================
@@ -226,4 +330,37 @@ const WAVES = [
   [{kind:'basic', count:150,gap:0.065},{kind:'fast', count:90, gap:0.08},{kind:'tank', count:62, gap:0.2}, {kind:'elite', count:52, gap:0.42}],
   [{kind:'elite', count:80, gap:0.38},{kind:'tank', count:72, gap:0.18},{kind:'bossMini', count:4, gap:1.5}],
   [{kind:'basic', count:110,gap:0.065},{kind:'fast', count:110,gap:0.065},{kind:'tank', count:80, gap:0.18},{kind:'elite', count:72, gap:0.36},{kind:'bossBig', count:8, gap:1.3}],
+  // 41-50: beyond-limit
+  [{kind:'tank',  count:60, gap:0.22},{kind:'elite',count:50, gap:0.4}, {kind:'bossMini',count:3, gap:1.5}],
+  [{kind:'fast',  count:160,gap:0.06},{kind:'elite',count:55, gap:0.4}, {kind:'bossMini',count:4, gap:1.4}],
+  [{kind:'basic', count:140,gap:0.06},{kind:'tank', count:70, gap:0.2}, {kind:'elite', count:60, gap:0.4}, {kind:'bossBig', count:2, gap:1.8}],
+  [{kind:'tank',  count:90, gap:0.2}, {kind:'elite',count:80, gap:0.38},{kind:'bossBig', count:3, gap:1.6}],
+  [{kind:'fast',  count:180,gap:0.055},{kind:'tank',count:80, gap:0.2}, {kind:'elite', count:80, gap:0.38},{kind:'bossBig', count:3, gap:1.5}, {kind:'bossMini',count:4, gap:1.3}],
+  [{kind:'tank',  count:100,gap:0.18},{kind:'elite',count:90, gap:0.36},{kind:'bossBig', count:4, gap:1.4}],
+  [{kind:'fast',  count:200,gap:0.05},{kind:'elite',count:95, gap:0.35},{kind:'bossBig', count:4, gap:1.4}],
+  [{kind:'basic', count:150,gap:0.05},{kind:'fast', count:110,gap:0.06},{kind:'elite', count:100,gap:0.35},{kind:'bossBig', count:5, gap:1.3}],
+  [{kind:'tank',  count:120,gap:0.16},{kind:'elite',count:120,gap:0.34},{kind:'bossBig', count:6, gap:1.3}],
+  [{kind:'basic', count:140,gap:0.05},{kind:'fast', count:140,gap:0.05},{kind:'tank', count:100,gap:0.17},{kind:'elite', count:90, gap:0.32},{kind:'bossBig', count:10,gap:1.2}],
+  // 51-60: relentless
+  [{kind:'elite', count:130,gap:0.3}, {kind:'bossBig',count:5,gap:1.3}, {kind:'bossMini',count:6, gap:1.2}],
+  [{kind:'tank',  count:130,gap:0.15},{kind:'elite',count:120,gap:0.3}, {kind:'bossBig', count:7, gap:1.2}],
+  [{kind:'fast',  count:260,gap:0.045},{kind:'elite',count:140,gap:0.3},{kind:'bossBig', count:8, gap:1.2}],
+  [{kind:'basic', count:220,gap:0.045},{kind:'tank',count:140,gap:0.15},{kind:'bossBig', count:8, gap:1.2}],
+  [{kind:'fast',  count:280,gap:0.04},{kind:'tank', count:150,gap:0.14},{kind:'elite', count:140,gap:0.28},{kind:'bossBig', count:10,gap:1.15},{kind:'bossMini',count:6, gap:1.1}],
+  [{kind:'tank',  count:160,gap:0.13},{kind:'elite',count:160,gap:0.28},{kind:'bossBig', count:10,gap:1.1}],
+  [{kind:'basic', count:260,gap:0.04},{kind:'fast', count:200,gap:0.045},{kind:'bossBig', count:12,gap:1.1}],
+  [{kind:'tank',  count:180,gap:0.12},{kind:'elite',count:180,gap:0.26},{kind:'bossBig', count:12,gap:1.1}],
+  [{kind:'fast',  count:320,gap:0.04},{kind:'elite',count:200,gap:0.26},{kind:'bossBig', count:14,gap:1.05}],
+  [{kind:'basic', count:240,gap:0.04},{kind:'fast', count:220,gap:0.04},{kind:'tank', count:200,gap:0.12},{kind:'elite', count:180,gap:0.25},{kind:'bossBig', count:16,gap:1.0}, {kind:'bossMini',count:10,gap:1.0}],
+  // 61-70: apocalypse
+  [{kind:'elite', count:220,gap:0.24},{kind:'bossBig', count:18,gap:1.0}],
+  [{kind:'tank',  count:220,gap:0.11},{kind:'bossBig', count:22,gap:0.95}],
+  [{kind:'fast',  count:400,gap:0.035},{kind:'elite',count:220,gap:0.22},{kind:'bossBig', count:20,gap:0.95}],
+  [{kind:'basic', count:320,gap:0.035},{kind:'fast',count:260,gap:0.038},{kind:'tank', count:220,gap:0.11},{kind:'bossBig', count:22,gap:0.9}],
+  [{kind:'tank',  count:260,gap:0.1}, {kind:'elite',count:260,gap:0.22},{kind:'bossBig', count:26,gap:0.9}],
+  [{kind:'elite', count:320,gap:0.2}, {kind:'bossBig', count:28,gap:0.85}],
+  [{kind:'fast',  count:500,gap:0.03},{kind:'elite',count:280,gap:0.2}, {kind:'bossBig', count:28,gap:0.85}],
+  [{kind:'tank',  count:320,gap:0.1}, {kind:'elite',count:320,gap:0.2}, {kind:'bossBig', count:32,gap:0.8}],
+  [{kind:'basic', count:420,gap:0.03},{kind:'fast', count:320,gap:0.035},{kind:'tank', count:280,gap:0.1}, {kind:'elite', count:280,gap:0.18},{kind:'bossBig', count:32,gap:0.8}],
+  [{kind:'basic', count:300,gap:0.03},{kind:'fast', count:320,gap:0.03},{kind:'tank', count:280,gap:0.1}, {kind:'elite', count:280,gap:0.18},{kind:'bossBig', count:50,gap:0.75},{kind:'bossMini',count:20,gap:0.9}],
 ];
