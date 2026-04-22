@@ -384,10 +384,6 @@ class Game {
     ctx.fillStyle = '#cfd6e4';
     ctx.fillRect(0, 0, W, H);
 
-    if (this.shake > 0) {
-      ctx.translate(rand(-this.shake, this.shake) * 0.5, rand(-this.shake, this.shake) * 0.5);
-    }
-
     this.drawGrid();
     this.drawNest();
     this.drawCakes();
