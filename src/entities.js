@@ -12,7 +12,7 @@ class Ant {
     this.maxHp = Math.round(k.hp * waveHpMul * extra);
     this.hp = this.maxHp;
     // per-ant speed variance so they naturally spread out instead of marching in lockstep
-    this.speed = k.speed * (1 + (game.wave - 1) * 0.015) * rand(0.85, 1.15);
+    this.speed = k.speed * (1 + (game.wave - 1) * 0.022) * rand(0.85, 1.15);
     // unique seed per ant — mixed with waypoint coords to pick an off-center target in each cell
     this.jitterSeed = Math.random() * 1000;
     // leg animation runs at a slightly different tempo per ant
