@@ -203,15 +203,9 @@ class Game {
   startWave() {
     if (this.wave >= WAVES.length) return;
     this.wave++;
-    const w = this.wave;
-    this.waveHpMul =
-      w <= 10 ? 1 + (w - 1) * 0.32 :
-      w <= 20 ? 3.88 + (w - 10) * 0.58 :
-      w <= 30 ? 9.68 + (w - 20) * 0.90 :
-      w <= 40 ? 18.68 + (w - 30) * 1.50 :
-      w <= 50 ? 33.68 + (w - 40) * 2.20 :
-      w <= 60 ? 55.68 + (w - 50) * 3.10 :
-                86.68 + (w - 60) * 4.30;
+    // Exponential HP scaling: +7% per wave, compounded.
+    // w1 = 1x, w10 ≈ 1.8x, w30 ≈ 7.6x, w50 ≈ 29x, w70 ≈ 113x.
+    this.waveHpMul = Math.pow(1.07, this.wave - 1);
     this.spawnQueue = [];
     for (const group of WAVES[this.wave - 1]) {
       for (let i = 0; i < group.count; i++) {
