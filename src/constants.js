@@ -129,25 +129,25 @@ const TOWER_DEFS = {
   // Sniper path — long range, high damage, slow fire
   sniper2: {
     key: 'sniper2', name: '저격 Lv.2', icon: '◎', color: '#5ad4e0',
-    cost: 100, damage: 28, range: 4.8, fireRate: 0.7, projSpeed: 1200,
+    cost: 100, damage: 28, range: 4.8, fireRate: 0.45, projSpeed: 1200,
     path: 'sniper', level: 2,
-    desc: '장거리 단발 저격.'
+    desc: '장거리 단발 저격 · 긴 재장전.'
   },
   sniper3: {
     key: 'sniper3', name: '대물저격 Lv.3', icon: '◎', color: '#3d9cd8',
-    cost: 200, damage: 70, range: 5.4, fireRate: 0.75, projSpeed: 1300,
+    cost: 200, damage: 70, range: 5.4, fireRate: 0.5, projSpeed: 1300,
     path: 'sniper', level: 3,
     desc: '더 먼 거리에서 정밀 사격.'
   },
   sniper4: {
     key: 'sniper4', name: '레일건 Lv.4', icon: '◎', color: '#1e63d0',
-    cost: 400, damage: 150, range: 6.2, fireRate: 0.8, projSpeed: 1500,
+    cost: 400, damage: 150, range: 6.2, fireRate: 0.55, projSpeed: 1500,
     path: 'sniper', level: 4,
     desc: '전자기로 가속된 초고속 탄환.'
   },
   sniper5: {
     key: 'sniper5', name: '광자포 Lv.5', icon: '◎', color: '#7b2cff',
-    cost: 700, damage: 320, range: 7.2, fireRate: 0.9, projSpeed: 1800,
+    cost: 700, damage: 320, range: 7.2, fireRate: 0.65, projSpeed: 1800,
     path: 'sniper', level: 5,
     desc: '맵 대각선 끝까지 닿는 광속 포격.'
   },
