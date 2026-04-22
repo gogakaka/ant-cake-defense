@@ -11,7 +11,12 @@ class Ant {
     const extra = 1 + (game.wave - 1) * (k.perWaveHp || 0);
     this.maxHp = Math.round(k.hp * waveHpMul * extra);
     this.hp = this.maxHp;
-    this.speed = k.speed * (1 + (game.wave - 1) * 0.015);
+    // per-ant speed variance so they naturally spread out instead of marching in lockstep
+    this.speed = k.speed * (1 + (game.wave - 1) * 0.015) * rand(0.85, 1.15);
+    // unique seed per ant — mixed with waypoint coords to pick an off-center target in each cell
+    this.jitterSeed = Math.random() * 1000;
+    // leg animation runs at a slightly different tempo per ant
+    this.legSpeed = rand(0.8, 1.3);
     this.reward = k.reward;
     this.r = k.r;
     this.color = k.color;
@@ -91,10 +96,17 @@ class Ant {
       this.pathDirty = true;
       return;
     }
-    this.legPhase += dt * 14;
+    this.legPhase += dt * 14 * this.legSpeed;
 
     const wp = this.path[this.pathIdx];
     const tgt = gridToWorld(wp.gx, wp.gy);
+    // Per-ant jitter inside each cell so ants don't converge on the same centerline.
+    // Skip on the very last waypoint so arrival at cake/nest stays tidy.
+    if (this.pathIdx < this.path.length - 1) {
+      const r = GRID.CELL * 0.3;
+      tgt.x += Math.sin(wp.gx * 7.3 + wp.gy * 13.1 + this.jitterSeed) * r;
+      tgt.y += Math.cos(wp.gx * 11.7 + wp.gy * 17.3 + this.jitterSeed) * r;
+    }
     const dx = tgt.x - this.x, dy = tgt.y - this.y;
     const d = Math.hypot(dx, dy);
     let spd = this.speed;
