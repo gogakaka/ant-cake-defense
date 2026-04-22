@@ -27,9 +27,9 @@ const CAKE_POSITIONS = [
 // Palette (canvas-side)
 // ============================================================
 const COLORS = {
-  gridLine: 'rgba(180, 195, 240, 0.08)',
-  gridEven: '#272c50',
-  gridOdd: '#2a2f55',
+  gridLine: 'rgba(60, 74, 120, 0.12)',
+  gridEven: '#dde3f0',
+  gridOdd: '#e4e9f3',
   nestRing: '#5a3c20',
   nestPit: '#1a0f08',
   cakeBase: '#f4c2c2',
@@ -38,11 +38,11 @@ const COLORS = {
   cakeCherry: '#d94a4a',
   antBody: '#2a1a0f',
   antAccent: '#6b3f1f',
-  pathPreview: 'rgba(255, 255, 255, 0.06)',
-  rangeOk: 'rgba(94, 230, 168, 0.18)',
-  rangeOkBorder: 'rgba(94, 230, 168, 0.6)',
-  rangeBad: 'rgba(255, 107, 107, 0.18)',
-  rangeBadBorder: 'rgba(255, 107, 107, 0.6)',
+  pathPreview: 'rgba(60, 74, 120, 0.06)',
+  rangeOk: 'rgba(47, 174, 116, 0.18)',
+  rangeOkBorder: 'rgba(47, 174, 116, 0.6)',
+  rangeBad: 'rgba(224, 88, 90, 0.18)',
+  rangeBadBorder: 'rgba(224, 88, 90, 0.6)',
 };
 
 // ============================================================

@@ -392,7 +392,7 @@ class Game {
   render() {
     const ctx = this.ctx;
     ctx.save();
-    ctx.fillStyle = '#1e2244';
+    ctx.fillStyle = '#cfd6e4';
     ctx.fillRect(0, 0, W, H);
 
     if (this.shake > 0) {
@@ -555,7 +555,7 @@ class Game {
     if (!shortest) return;
     const ctx = this.ctx;
     ctx.save();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.055)';
+    ctx.strokeStyle = 'rgba(60, 74, 120, 0.09)';
     ctx.lineWidth = 14;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
