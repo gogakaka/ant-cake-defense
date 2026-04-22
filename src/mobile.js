@@ -40,18 +40,22 @@
 
   onReady(() => {
     ensureRotatePrompt();
-    ensureStageGrip();
+    installStageSwipe();
     guardCanvasGestures();
   });
 
   /**
-   * Free-form stage repositioning.
-   * The HUD buttons often get crowded against the screen edges on phones.
-   * A floating grip lets the player drag the whole stage to wherever feels
-   * comfortable — no snap back, no viewport clamp. Position persists.
+   * Swipe-to-move for the whole stage.
+   * A finger drag across the board translates the stage via CSS transform.
+   * Tap-to-place still works: we only commit to drag after the finger moves
+   * past a small distance threshold, and on drag-end we preventDefault so the
+   * synthesized mousedown/click doesn't fire on whatever cell the finger
+   * lifted over. Free-form — no snap, no viewport clamp. Position persists.
    */
   const STORAGE_KEY = 'acd.stage-offset';
-  let gripDrag = null;
+  const DRAG_THRESHOLD = 10; // viewport pixels
+
+  let dragState = null;
 
   function getStage() { return document.getElementById('stage'); }
 
@@ -74,72 +78,81 @@
     stage.style.transform = (x || y) ? `translate(${x}px, ${y}px)` : '';
   }
 
-  function ensureStageGrip() {
-    if (document.getElementById('stage-grip')) return;
-    const btn = document.createElement('button');
-    btn.id = 'stage-grip';
-    btn.type = 'button';
-    btn.setAttribute('aria-label', '게임 화면 이동 (더블탭으로 원위치)');
-    btn.title = '드래그하여 이동 · 더블탭으로 원위치';
-    btn.innerHTML = `
-      <svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor" aria-hidden="true">
-        <circle cx="6" cy="5" r="1.5"/><circle cx="10" cy="5" r="1.5"/><circle cx="14" cy="5" r="1.5"/>
-        <circle cx="6" cy="10" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="14" cy="10" r="1.5"/>
-        <circle cx="6" cy="15" r="1.5"/><circle cx="10" cy="15" r="1.5"/><circle cx="14" cy="15" r="1.5"/>
-      </svg>`;
-    document.body.appendChild(btn);
+  // Don't hijack taps on HUD buttons, popup/overlay controls, etc.
+  function isInteractiveTarget(t) {
+    return !!(t && t.closest && t.closest(
+      'button, a, input, select, textarea, .popup, .overlay-card, #start-screen'
+    ));
+  }
+
+  function findTouch(list, id) {
+    for (const t of list) if (t.identifier === id) return t;
+    return null;
+  }
+
+  function installStageSwipe() {
+    const stage = getStage();
+    if (!stage) return;
 
     const initial = loadOffset();
     applyOffset(initial.x, initial.y);
 
-    btn.addEventListener('pointerdown', onGripDown);
-    btn.addEventListener('dblclick', (e) => {
-      e.preventDefault();
-      applyOffset(0, 0);
-      saveOffset(0, 0);
-    });
+    stage.addEventListener('touchstart',  onTouchStart,  { passive: true  });
+    stage.addEventListener('touchmove',   onTouchMove,   { passive: false });
+    stage.addEventListener('touchend',    onTouchEnd,    { passive: false });
+    stage.addEventListener('touchcancel', onTouchCancel, { passive: true  });
   }
 
-  function onGripDown(e) {
-    if (e.button !== undefined && e.button !== 0) return;
-    e.preventDefault();
-    const btn = e.currentTarget;
+  function onTouchStart(e) {
+    // Multi-touch (pinch etc.) — bail.
+    if (e.touches.length !== 1) { dragState = null; return; }
+    if (isInteractiveTarget(e.target)) { dragState = null; return; }
+    const t = e.touches[0];
     const base = loadOffset();
-    gripDrag = {
-      id: e.pointerId,
-      startX: e.clientX,
-      startY: e.clientY,
+    dragState = {
+      id: t.identifier,
+      startX: t.clientX,
+      startY: t.clientY,
       baseX: base.x,
       baseY: base.y,
-      moved: false,
+      dragging: false,
     };
-    btn.classList.add('dragging');
-    try { btn.setPointerCapture(e.pointerId); } catch {}
-    btn.addEventListener('pointermove', onGripMove);
-    btn.addEventListener('pointerup', onGripUp);
-    btn.addEventListener('pointercancel', onGripUp);
   }
 
-  function onGripMove(e) {
-    if (!gripDrag || e.pointerId !== gripDrag.id) return;
-    const dx = e.clientX - gripDrag.startX;
-    const dy = e.clientY - gripDrag.startY;
-    if (!gripDrag.moved && Math.hypot(dx, dy) > 2) gripDrag.moved = true;
-    applyOffset(gripDrag.baseX + dx, gripDrag.baseY + dy);
+  function onTouchMove(e) {
+    if (!dragState) return;
+    const t = findTouch(e.touches, dragState.id);
+    if (!t) return;
+    const dx = t.clientX - dragState.startX;
+    const dy = t.clientY - dragState.startY;
+    if (!dragState.dragging) {
+      if (Math.hypot(dx, dy) < DRAG_THRESHOLD) return;
+      dragState.dragging = true;
+      getStage()?.classList.add('dragging');
+    }
+    e.preventDefault();
+    applyOffset(dragState.baseX + dx, dragState.baseY + dy);
   }
 
-  function onGripUp(e) {
-    if (!gripDrag || e.pointerId !== gripDrag.id) return;
-    const btn = e.currentTarget;
-    const dx = e.clientX - gripDrag.startX;
-    const dy = e.clientY - gripDrag.startY;
-    if (gripDrag.moved) saveOffset(gripDrag.baseX + dx, gripDrag.baseY + dy);
-    btn.classList.remove('dragging');
-    try { btn.releasePointerCapture?.(e.pointerId); } catch {}
-    btn.removeEventListener('pointermove', onGripMove);
-    btn.removeEventListener('pointerup', onGripUp);
-    btn.removeEventListener('pointercancel', onGripUp);
-    gripDrag = null;
+  function onTouchEnd(e) {
+    if (!dragState) return;
+    const t = findTouch(e.changedTouches, dragState.id);
+    if (!t) { dragState = null; return; }
+    if (dragState.dragging) {
+      // Suppress the synthesized mousedown/click so the game doesn't treat
+      // the end of a swipe as a tap on whatever cell the finger lifted over.
+      e.preventDefault();
+      const dx = t.clientX - dragState.startX;
+      const dy = t.clientY - dragState.startY;
+      saveOffset(dragState.baseX + dx, dragState.baseY + dy);
+      getStage()?.classList.remove('dragging');
+    }
+    dragState = null;
+  }
+
+  function onTouchCancel() {
+    if (dragState?.dragging) getStage()?.classList.remove('dragging');
+    dragState = null;
   }
 
   /**
