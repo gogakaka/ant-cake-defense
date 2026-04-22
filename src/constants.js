@@ -140,12 +140,12 @@ const UPGRADES = {
 // Ant kinds (base stats; scale by wave via ensureHp & speed)
 // ============================================================
 const ANT_KINDS = {
-  basic:    { hp: 14,  speed: 55, reward: 6,   r: 7,  color: '#2a1a0f', perWaveHp: 0.03 },
-  fast:     { hp:  9,  speed: 92, reward: 7,   r: 6,  color: '#3a2014', perWaveHp: 0.03 },
-  tank:     { hp: 46,  speed: 36, reward: 18,  r: 10, color: '#1a0a05', perWaveHp: 0.02 },
-  elite:    { hp: 90,  speed: 48, reward: 36,  r: 9,  color: '#4d1f0a', perWaveHp: 0.02 },
-  bossMini: { hp: 320, speed: 30, reward: 120, r: 15, color: '#2d0a2a', perWaveHp: 0, isBoss: true, tier: 'mini' },
-  bossBig:  { hp: 780, speed: 22, reward: 360, r: 20, color: '#3d0810', perWaveHp: 0, isBoss: true, tier: 'big' },
+  basic:    { hp: 14,  speed: 55, reward: 3,   r: 7,  color: '#2a1a0f', perWaveHp: 0.04 },
+  fast:     { hp:  9,  speed: 92, reward: 3,   r: 6,  color: '#3a2014', perWaveHp: 0.03 },
+  tank:     { hp: 46,  speed: 36, reward: 9,   r: 10, color: '#1a0a05', perWaveHp: 0.025 },
+  elite:    { hp: 90,  speed: 48, reward: 18,  r: 9,  color: '#4d1f0a', perWaveHp: 0.025 },
+  bossMini: { hp: 320, speed: 30, reward: 60,  r: 15, color: '#2d0a2a', perWaveHp: 0, isBoss: true, tier: 'mini' },
+  bossBig:  { hp: 780, speed: 22, reward: 180, r: 20, color: '#3d0810', perWaveHp: 0, isBoss: true, tier: 'big' },
 };
 
 // ============================================================

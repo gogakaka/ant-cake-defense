@@ -221,10 +221,10 @@ class Game {
     this.wave++;
     const w = this.wave;
     this.waveHpMul =
-      w <= 10 ? 1 + (w - 1) * 0.22 :
-      w <= 20 ? 2.98 + (w - 10) * 0.38 :
-      w <= 30 ? 6.78 + (w - 20) * 0.58 :
-                12.58 + (w - 30) * 0.95;
+      w <= 10 ? 1 + (w - 1) * 0.24 :
+      w <= 20 ? 3.16 + (w - 10) * 0.42 :
+      w <= 30 ? 7.36 + (w - 20) * 0.65 :
+                13.86 + (w - 30) * 1.10;
     this.spawnQueue = [];
     for (const group of WAVES[this.wave - 1]) {
       for (let i = 0; i < group.count; i++) {
