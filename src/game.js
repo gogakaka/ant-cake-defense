@@ -398,8 +398,6 @@ class Game {
     this.drawCakes();
     this.drawPlacementIndicator();
 
-    if (this.started && !this.gameOver) this.drawGuidePath();
-
     for (const t of this.towers) {
       const selected = t === this.selectedTower;
       const hov = this.hoverCell && this.hoverCell.gx === t.gx && this.hoverCell.gy === t.gy;
