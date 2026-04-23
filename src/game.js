@@ -248,7 +248,7 @@ class Game {
         } else {
           this.waveState = 'prep';
           this.waveTimer = 4;
-          this.credits += 8 + this.wave * 2;
+          this.credits += 12 + this.wave * 3;
           this.updateHUD();
         }
       }
