@@ -207,9 +207,13 @@ class Game {
   startWave() {
     if (this.wave >= WAVES.length) return;
     this.wave++;
-    // Exponential HP scaling: +8% per wave, compounded.
-    // w1 = 1x, w10 ≈ 2.0x, w30 ≈ 9.3x, w50 ≈ 43x, w70 ≈ 202x.
-    this.waveHpMul = Math.pow(1.08, this.wave - 1);
+    // Exponential HP scaling: +8% per wave baseline, with an additional
+    // +2.5% per wave compounding after wave 30 so late-game ants pile up HP fast.
+    // w1 = 1x, w10 ≈ 2.0x, w30 ≈ 9.3x, w40 ≈ 25.7x, w50 ≈ 71.2x, w60 ≈ 196.8x, w70 ≈ 543x.
+    const w = this.wave;
+    let mul = Math.pow(1.08, w - 1);
+    if (w > 30) mul *= Math.pow(1.025, w - 30);
+    this.waveHpMul = mul;
     this.spawnQueue = [];
     for (const group of WAVES[this.wave - 1]) {
       for (let i = 0; i < group.count; i++) {
@@ -265,9 +269,11 @@ class Game {
     }
     this.removeAnts.push(ant);
     if (ant.isBoss) {
-      const big = ant.bossTier === 'big';
-      this.explode(ant.x, ant.y, big ? 42 : 28, big ? '#ff4040' : '#ff60d0');
-      this.shake = Math.max(this.shake, big ? 22 : 14);
+      const tier = ant.bossTier;
+      const r = tier === 'mega' ? 72 : tier === 'big' ? 42 : 28;
+      const color = tier === 'mega' ? '#ffc800' : tier === 'big' ? '#ff4040' : '#ff60d0';
+      this.explode(ant.x, ant.y, r, color);
+      this.shake = Math.max(this.shake, tier === 'mega' ? 40 : tier === 'big' ? 22 : 14);
     } else {
       this.explode(ant.x, ant.y, 14, '#ffaa66');
     }

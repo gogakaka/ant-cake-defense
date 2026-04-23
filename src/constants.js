@@ -274,8 +274,9 @@ const ANT_KINDS = {
   fast:     { hp:  9,  speed: 92, reward: 2,   r: 6,  color: '#3a2014', perWaveHp: 0.03 },
   tank:     { hp: 46,  speed: 36, reward: 5,   r: 10, color: '#1a0a05', perWaveHp: 0.025 },
   elite:    { hp: 90,  speed: 48, reward: 10,  r: 9,  color: '#4d1f0a', perWaveHp: 0.025 },
-  bossMini: { hp: 320, speed: 30, reward: 30,  r: 15, color: '#2d0a2a', perWaveHp: 0, isBoss: true, tier: 'mini' },
-  bossBig:  { hp: 780, speed: 22, reward: 100, r: 20, color: '#3d0810', perWaveHp: 0, isBoss: true, tier: 'big' },
+  bossMini: { hp: 320,  speed: 30, reward: 30,  r: 15, color: '#2d0a2a', perWaveHp: 0,    isBoss: true, tier: 'mini' },
+  bossBig:  { hp: 780,  speed: 22, reward: 100, r: 20, color: '#3d0810', perWaveHp: 0,    isBoss: true, tier: 'big' },
+  bossMega: { hp: 2600, speed: 14, reward: 400, r: 28, color: '#0c0616', perWaveHp: 0.01, isBoss: true, tier: 'mega' },
 };
 
 // ============================================================
@@ -293,7 +294,7 @@ const WAVES = [
   [{kind:'fast',  count:24, gap:0.3}, {kind:'tank', count:6, gap:0.9}],
   [{kind:'basic', count:22, gap:0.45},{kind:'tank', count:9, gap:0.8}],
   [{kind:'basic', count:26, gap:0.4}, {kind:'fast', count:18, gap:0.32},{kind:'tank', count:7, gap:0.75}],
-  [{kind:'fast',  count:30, gap:0.28},{kind:'tank', count:9, gap:0.75},{kind:'elite', count:2, gap:1.1},  {kind:'bossMini', count:1, gap:2.8}],
+  [{kind:'fast',  count:30, gap:0.28},{kind:'tank', count:9, gap:0.75},{kind:'elite', count:2, gap:1.1},  {kind:'bossMini', count:1, gap:2.8}, {kind:'bossMega', count:1, gap:3.5}],
   // 11-15: elites common
   [{kind:'basic', count:30, gap:0.32},{kind:'fast', count:18, gap:0.3}, {kind:'tank', count:10, gap:0.7}],
   [{kind:'tank',  count:18, gap:0.55},{kind:'fast', count:22, gap:0.28}],
@@ -305,7 +306,7 @@ const WAVES = [
   [{kind:'basic', count:44, gap:0.22},{kind:'tank', count:16, gap:0.45},{kind:'elite', count:8, gap:0.85}],
   [{kind:'fast',  count:52, gap:0.2}, {kind:'tank', count:20, gap:0.4}, {kind:'elite', count:8, gap:0.75}],
   [{kind:'tank',  count:30, gap:0.4}, {kind:'elite',count:12, gap:0.75}],
-  [{kind:'basic', count:50, gap:0.18},{kind:'fast', count:36, gap:0.2}, {kind:'elite', count:10, gap:0.7}, {kind:'bossMini', count:3, gap:1.7}],
+  [{kind:'basic', count:50, gap:0.18},{kind:'fast', count:36, gap:0.2}, {kind:'elite', count:10, gap:0.7}, {kind:'bossMini', count:3, gap:1.7}, {kind:'bossMega', count:1, gap:3.2}],
   // 21-25: heavy pressure
   [{kind:'fast',  count:60, gap:0.18},{kind:'tank', count:22, gap:0.4}, {kind:'elite', count:10, gap:0.7}],
   [{kind:'tank',  count:36, gap:0.36},{kind:'elite',count:15, gap:0.65}],
@@ -317,7 +318,7 @@ const WAVES = [
   [{kind:'fast',  count:85, gap:0.12},{kind:'tank', count:32, gap:0.32},{kind:'elite', count:22, gap:0.55}],
   [{kind:'basic', count:80, gap:0.11},{kind:'tank', count:34, gap:0.32},{kind:'elite', count:24, gap:0.55}],
   [{kind:'fast',  count:95, gap:0.1}, {kind:'tank', count:40, gap:0.3}, {kind:'elite', count:24, gap:0.55}],
-  [{kind:'tank',  count:55, gap:0.28},{kind:'elite',count:34, gap:0.5}, {kind:'bossBig', count:2, gap:2.4}, {kind:'bossMini', count:2, gap:1.6}],
+  [{kind:'tank',  count:55, gap:0.28},{kind:'elite',count:34, gap:0.5}, {kind:'bossBig', count:2, gap:2.4}, {kind:'bossMini', count:2, gap:1.6}, {kind:'bossMega', count:1, gap:3.0}],
   // 31-35: brutal
   [{kind:'basic', count:110,gap:0.09},{kind:'fast', count:72, gap:0.1}, {kind:'elite', count:32, gap:0.5}],
   [{kind:'fast',  count:120,gap:0.09},{kind:'tank', count:50, gap:0.28},{kind:'elite', count:32, gap:0.5}],
@@ -329,7 +330,7 @@ const WAVES = [
   [{kind:'fast',  count:160,gap:0.065},{kind:'elite',count:50, gap:0.42}],
   [{kind:'basic', count:150,gap:0.065},{kind:'fast', count:90, gap:0.08},{kind:'tank', count:62, gap:0.2}, {kind:'elite', count:52, gap:0.42}],
   [{kind:'elite', count:80, gap:0.38},{kind:'tank', count:72, gap:0.18},{kind:'bossMini', count:4, gap:1.5}],
-  [{kind:'basic', count:110,gap:0.065},{kind:'fast', count:110,gap:0.065},{kind:'tank', count:80, gap:0.18},{kind:'elite', count:72, gap:0.36},{kind:'bossBig', count:8, gap:1.3}],
+  [{kind:'basic', count:110,gap:0.065},{kind:'fast', count:110,gap:0.065},{kind:'tank', count:80, gap:0.18},{kind:'elite', count:72, gap:0.36},{kind:'bossBig', count:8, gap:1.3}, {kind:'bossMega', count:1, gap:2.8}],
   // 41-50: beyond-limit
   [{kind:'tank',  count:60, gap:0.22},{kind:'elite',count:50, gap:0.4}, {kind:'bossMini',count:3, gap:1.5}],
   [{kind:'fast',  count:160,gap:0.06},{kind:'elite',count:55, gap:0.4}, {kind:'bossMini',count:4, gap:1.4}],
@@ -340,7 +341,7 @@ const WAVES = [
   [{kind:'fast',  count:200,gap:0.05},{kind:'elite',count:95, gap:0.35},{kind:'bossBig', count:4, gap:1.4}],
   [{kind:'basic', count:150,gap:0.05},{kind:'fast', count:110,gap:0.06},{kind:'elite', count:100,gap:0.35},{kind:'bossBig', count:5, gap:1.3}],
   [{kind:'tank',  count:120,gap:0.16},{kind:'elite',count:120,gap:0.34},{kind:'bossBig', count:6, gap:1.3}],
-  [{kind:'basic', count:140,gap:0.05},{kind:'fast', count:140,gap:0.05},{kind:'tank', count:100,gap:0.17},{kind:'elite', count:90, gap:0.32},{kind:'bossBig', count:10,gap:1.2}],
+  [{kind:'basic', count:140,gap:0.05},{kind:'fast', count:140,gap:0.05},{kind:'tank', count:100,gap:0.17},{kind:'elite', count:90, gap:0.32},{kind:'bossBig', count:10,gap:1.2}, {kind:'bossMega', count:1, gap:2.6}],
   // 51-60: relentless
   [{kind:'elite', count:130,gap:0.3}, {kind:'bossBig',count:5,gap:1.3}, {kind:'bossMini',count:6, gap:1.2}],
   [{kind:'tank',  count:130,gap:0.15},{kind:'elite',count:120,gap:0.3}, {kind:'bossBig', count:7, gap:1.2}],
@@ -351,7 +352,7 @@ const WAVES = [
   [{kind:'basic', count:260,gap:0.04},{kind:'fast', count:200,gap:0.045},{kind:'bossBig', count:12,gap:1.1}],
   [{kind:'tank',  count:180,gap:0.12},{kind:'elite',count:180,gap:0.26},{kind:'bossBig', count:12,gap:1.1}],
   [{kind:'fast',  count:320,gap:0.04},{kind:'elite',count:200,gap:0.26},{kind:'bossBig', count:14,gap:1.05}],
-  [{kind:'basic', count:240,gap:0.04},{kind:'fast', count:220,gap:0.04},{kind:'tank', count:200,gap:0.12},{kind:'elite', count:180,gap:0.25},{kind:'bossBig', count:16,gap:1.0}, {kind:'bossMini',count:10,gap:1.0}],
+  [{kind:'basic', count:240,gap:0.04},{kind:'fast', count:220,gap:0.04},{kind:'tank', count:200,gap:0.12},{kind:'elite', count:180,gap:0.25},{kind:'bossBig', count:16,gap:1.0}, {kind:'bossMini',count:10,gap:1.0}, {kind:'bossMega', count:1, gap:2.4}],
   // 61-70: apocalypse
   [{kind:'elite', count:220,gap:0.24},{kind:'bossBig', count:18,gap:1.0}],
   [{kind:'tank',  count:220,gap:0.11},{kind:'bossBig', count:22,gap:0.95}],
@@ -362,5 +363,5 @@ const WAVES = [
   [{kind:'fast',  count:500,gap:0.03},{kind:'elite',count:280,gap:0.2}, {kind:'bossBig', count:28,gap:0.85}],
   [{kind:'tank',  count:320,gap:0.1}, {kind:'elite',count:320,gap:0.2}, {kind:'bossBig', count:32,gap:0.8}],
   [{kind:'basic', count:420,gap:0.03},{kind:'fast', count:320,gap:0.035},{kind:'tank', count:280,gap:0.1}, {kind:'elite', count:280,gap:0.18},{kind:'bossBig', count:32,gap:0.8}],
-  [{kind:'basic', count:300,gap:0.03},{kind:'fast', count:320,gap:0.03},{kind:'tank', count:280,gap:0.1}, {kind:'elite', count:280,gap:0.18},{kind:'bossBig', count:50,gap:0.75},{kind:'bossMini',count:20,gap:0.9}],
+  [{kind:'basic', count:300,gap:0.03},{kind:'fast', count:320,gap:0.03},{kind:'tank', count:280,gap:0.1}, {kind:'elite', count:280,gap:0.18},{kind:'bossBig', count:50,gap:0.75},{kind:'bossMini',count:20,gap:0.9}, {kind:'bossMega', count:1, gap:2.2}],
 ];

@@ -175,17 +175,30 @@ class Ant {
     // boss aura
     if (this.isBoss) {
       const pulse = 0.7 + Math.sin(performance.now() / 220 + this.legPhase) * 0.3;
-      const auraCol = this.bossTier === 'big' ? '#ff3838' : '#d040b0';
+      const auraCol = this.bossTier === 'mega' ? '#ffb300'
+                   : this.bossTier === 'big'  ? '#ff3838'
+                                              : '#d040b0';
       ctx.save();
-      ctx.globalAlpha = 0.22 * pulse;
+      // mega gets a larger outer halo
+      const outerR = this.bossTier === 'mega' ? this.r * 2.3 : this.r * 1.9;
+      ctx.globalAlpha = (this.bossTier === 'mega' ? 0.28 : 0.22) * pulse;
       ctx.fillStyle = auraCol;
-      ctx.beginPath(); ctx.arc(this.x, this.y, this.r * 1.9, 0, Math.PI*2); ctx.fill();
-      ctx.globalAlpha = 0.5 * pulse;
+      ctx.beginPath(); ctx.arc(this.x, this.y, outerR, 0, Math.PI*2); ctx.fill();
+      ctx.globalAlpha = 0.55 * pulse;
       ctx.strokeStyle = auraCol;
-      ctx.lineWidth = 2;
+      ctx.lineWidth = this.bossTier === 'mega' ? 3 : 2;
       ctx.shadowColor = auraCol;
-      ctx.shadowBlur = 12;
-      ctx.beginPath(); ctx.arc(this.x, this.y, this.r * 1.55, 0, Math.PI*2); ctx.stroke();
+      ctx.shadowBlur = this.bossTier === 'mega' ? 20 : 12;
+      ctx.beginPath(); ctx.arc(this.x, this.y, this.r * 1.6, 0, Math.PI*2); ctx.stroke();
+      // mega gets a second counter-rotating ring
+      if (this.bossTier === 'mega') {
+        ctx.globalAlpha = 0.4 * pulse;
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([6, 4]);
+        ctx.lineDashOffset = -performance.now() / 50;
+        ctx.beginPath(); ctx.arc(this.x, this.y, this.r * 2.0, 0, Math.PI*2); ctx.stroke();
+        ctx.setLineDash([]);
+      }
       ctx.restore();
     }
 
@@ -242,23 +255,28 @@ class Ant {
     // boss crown
     if (this.isBoss) {
       const hx = this.r * 0.85;
-      const crownCol = this.bossTier === 'big' ? '#ffc857' : '#f080ff';
-      const gemCol   = this.bossTier === 'big' ? '#ff4040' : '#ff60ff';
-      const spikes = this.bossTier === 'big' ? 5 : 3;
+      const crownCol = this.bossTier === 'mega' ? '#ffd700'
+                     : this.bossTier === 'big'  ? '#ffc857'
+                                                : '#f080ff';
+      const gemCol   = this.bossTier === 'mega' ? '#ff2020'
+                     : this.bossTier === 'big'  ? '#ff4040'
+                                                : '#ff60ff';
+      const spikes = this.bossTier === 'mega' ? 7 : (this.bossTier === 'big' ? 5 : 3);
       ctx.fillStyle = crownCol;
       ctx.strokeStyle = '#1a0f08';
-      ctx.lineWidth = 0.8;
+      ctx.lineWidth = this.bossTier === 'mega' ? 1 : 0.8;
+      const spikeR = this.bossTier === 'mega' ? 2.4 : 1.6;
       for (let i = 0; i < spikes; i++) {
         const t = spikes === 1 ? 0 : (i / (spikes - 1));
-        const ang = -Math.PI * 0.5 + (t - 0.5) * Math.PI * 0.7;
-        const ox = hx + Math.cos(ang) * this.r * 0.55;
-        const oy = Math.sin(ang) * this.r * 0.55;
-        ctx.beginPath(); ctx.arc(ox, oy, 1.6, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+        const ang = -Math.PI * 0.5 + (t - 0.5) * Math.PI * 0.8;
+        const ox = hx + Math.cos(ang) * this.r * 0.58;
+        const oy = Math.sin(ang) * this.r * 0.58;
+        ctx.beginPath(); ctx.arc(ox, oy, spikeR, 0, Math.PI*2); ctx.fill(); ctx.stroke();
       }
       ctx.fillStyle = gemCol;
       ctx.shadowColor = gemCol;
-      ctx.shadowBlur = 8;
-      ctx.beginPath(); ctx.arc(hx, 0, 2.6, 0, Math.PI*2); ctx.fill();
+      ctx.shadowBlur = this.bossTier === 'mega' ? 14 : 8;
+      ctx.beginPath(); ctx.arc(hx, 0, this.bossTier === 'mega' ? 3.8 : 2.6, 0, Math.PI*2); ctx.fill();
       ctx.shadowBlur = 0;
     }
 
@@ -277,8 +295,10 @@ class Ant {
 
     // HP bar (wider for bosses)
     if (this.hp < this.maxHp || this.isBoss) {
-      const bw = this.isBoss ? (this.bossTier === 'big' ? 56 : 42) : 22;
-      const bh = this.isBoss ? 5 : 3;
+      const bw = this.isBoss
+        ? (this.bossTier === 'mega' ? 84 : this.bossTier === 'big' ? 56 : 42)
+        : 22;
+      const bh = this.isBoss ? (this.bossTier === 'mega' ? 7 : 5) : 3;
       ctx.fillStyle = 'rgba(0,0,0,0.55)';
       ctx.fillRect(this.x - bw/2 - 1, this.y - this.r - 10, bw + 2, bh + 2);
       const t = clamp(this.hp / this.maxHp, 0, 1);
