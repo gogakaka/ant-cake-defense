@@ -62,7 +62,7 @@ const TOWER_DEFS = {
   },
   missile2: {
     key: 'missile2', name: '미사일 Lv.2', icon: '🚀', color: '#ffa452',
-    cost: 100, damage: 18, range: 3.4, fireRate: 0.75, projSpeed: 380,
+    cost: 100, damage: 24, range: 3.4, fireRate: 0.75, projSpeed: 380,
     splash: 0.9, path: 'missile', level: 2,
     desc: '폭발로 여러 개미 타격.'
   },
@@ -80,7 +80,7 @@ const TOWER_DEFS = {
   },
   missile3: {
     key: 'missile3', name: '핵탄두 Lv.3', icon: '💥', color: '#ff7a2a',
-    cost: 200, damage: 45, range: 3.8, fireRate: 0.5, projSpeed: 340,
+    cost: 200, damage: 58, range: 3.8, fireRate: 0.5, projSpeed: 340,
     splash: 1.7, path: 'missile', level: 3,
     desc: '거대한 폭발 반경.'
   },
@@ -98,7 +98,7 @@ const TOWER_DEFS = {
   },
   missile4: {
     key: 'missile4', name: '시즈 Lv.4', icon: '☄', color: '#ff7520',
-    cost: 400, damage: 85, range: 4.2, fireRate: 0.45, projSpeed: 320,
+    cost: 400, damage: 110, range: 4.2, fireRate: 0.45, projSpeed: 320,
     splash: 2.2, path: 'missile', level: 4,
     desc: '거대한 포탄으로 광역 폭격.'
   },
@@ -116,7 +116,7 @@ const TOWER_DEFS = {
   },
   missile5: {
     key: 'missile5', name: '오비탈 Lv.5', icon: '☢', color: '#ff5010',
-    cost: 700, damage: 170, range: 4.6, fireRate: 0.45, projSpeed: 300,
+    cost: 700, damage: 220, range: 4.6, fireRate: 0.45, projSpeed: 300,
     splash: 3.0, path: 'missile', level: 5,
     desc: '궤도에서 낙하하는 초대형 폭발.'
   },
@@ -173,56 +173,56 @@ const TOWER_DEFS = {
   ice5: {
     key: 'ice5', name: '절대영도 Lv.5', icon: '❄', color: '#1e6ed4',
     cost: 700, damage: 12, range: 3.7, fireRate: 0, projSpeed: 0,
-    path: 'ice', level: 5, aura: true, slowFactor: 0.28,
-    desc: '72% 둔화 · 얼어붙을 지경.'
+    path: 'ice', level: 5, aura: true, slowFactor: 0.35,
+    desc: '65% 둔화 · 얼어붙을 지경.'
   },
   // Aura path — support. No damage. Boosts nearby towers.
   aura2: {
     key: 'aura2', name: '지휘소 Lv.2', icon: '✺', color: '#ffdb66',
-    cost: 100, damage: 0, range: 2.6, fireRate: 0,
-    path: 'aura', level: 2, support: true, buffDmg: 0.12, buffRate: 0.12,
-    desc: '주변 타워 데미지·연사 +12%.'
+    cost: 100, damage: 0, range: 2.4, fireRate: 0,
+    path: 'aura', level: 2, support: true, buffDmg: 0.05, buffRate: 0.05,
+    desc: '주변 타워 데미지·연사 +5%.'
   },
   aura3: {
     key: 'aura3', name: '지휘본부 Lv.3', icon: '✺', color: '#ffc831',
-    cost: 200, damage: 0, range: 2.9, fireRate: 0,
-    path: 'aura', level: 3, support: true, buffDmg: 0.22, buffRate: 0.22,
-    desc: '주변 타워 데미지·연사 +22%.'
+    cost: 200, damage: 0, range: 2.7, fireRate: 0,
+    path: 'aura', level: 3, support: true, buffDmg: 0.10, buffRate: 0.10,
+    desc: '주변 타워 데미지·연사 +10%.'
   },
   aura4: {
     key: 'aura4', name: '전략기지 Lv.4', icon: '✺', color: '#f5a200',
-    cost: 400, damage: 0, range: 3.2, fireRate: 0,
-    path: 'aura', level: 4, support: true, buffDmg: 0.32, buffRate: 0.32,
-    desc: '주변 타워 데미지·연사 +32%.'
+    cost: 400, damage: 0, range: 3.0, fireRate: 0,
+    path: 'aura', level: 4, support: true, buffDmg: 0.17, buffRate: 0.17,
+    desc: '주변 타워 데미지·연사 +17%.'
   },
   aura5: {
     key: 'aura5', name: '최고사령부 Lv.5', icon: '✺', color: '#e67400',
-    cost: 700, damage: 0, range: 3.5, fireRate: 0,
-    path: 'aura', level: 5, support: true, buffDmg: 0.48, buffRate: 0.48,
-    desc: '주변 타워 데미지·연사 +48%.'
+    cost: 700, damage: 0, range: 3.3, fireRate: 0,
+    path: 'aura', level: 5, support: true, buffDmg: 0.26, buffRate: 0.26,
+    desc: '주변 타워 데미지·연사 +26%.'
   },
   // Flame path — very short range, very high tick damage, no slow.
   flame2: {
     key: 'flame2', name: '화염 Lv.2', icon: '🔥', color: '#ff8240',
-    cost: 100, damage: 18, range: 1.8, fireRate: 0, projSpeed: 0,
+    cost: 100, damage: 13, range: 1.8, fireRate: 0, projSpeed: 0,
     path: 'flame', level: 2, aura: true, slowFactor: 1,
     desc: '짧은 사거리 · 초당 강력한 피해.'
   },
   flame3: {
     key: 'flame3', name: '불꽃 Lv.3', icon: '🔥', color: '#ff5a16',
-    cost: 200, damage: 36, range: 2.0, fireRate: 0, projSpeed: 0,
+    cost: 200, damage: 27, range: 2.0, fireRate: 0, projSpeed: 0,
     path: 'flame', level: 3, aura: true, slowFactor: 1,
     desc: '더 뜨거운 화염.'
   },
   flame4: {
     key: 'flame4', name: '용광로 Lv.4', icon: '🔥', color: '#e03818',
-    cost: 400, damage: 66, range: 2.2, fireRate: 0, projSpeed: 0,
+    cost: 400, damage: 52, range: 2.2, fireRate: 0, projSpeed: 0,
     path: 'flame', level: 4, aura: true, slowFactor: 1,
     desc: '근거리 광역 섬멸.'
   },
   flame5: {
     key: 'flame5', name: '지옥불 Lv.5', icon: '🔥', color: '#b81018',
-    cost: 700, damage: 120, range: 2.5, fireRate: 0, projSpeed: 0,
+    cost: 700, damage: 90, range: 2.5, fireRate: 0, projSpeed: 0,
     path: 'flame', level: 5, aura: true, slowFactor: 1,
     desc: '지나가는 모든 것을 태움.'
   },
@@ -230,26 +230,26 @@ const TOWER_DEFS = {
   bank2: {
     key: 'bank2', name: '금광 Lv.2', icon: '💰', color: '#ffd860',
     cost: 100, damage: 0, range: 0, fireRate: 0,
-    path: 'bank', level: 2, bank: true, bankRate: 1.0,
-    desc: '초당 +1 크레딧 자동 생성.'
+    path: 'bank', level: 2, bank: true, bankRate: 0.5,
+    desc: '초당 +0.5 크레딧 자동 생성.'
   },
   bank3: {
     key: 'bank3', name: '금고 Lv.3', icon: '💰', color: '#f5b200',
     cost: 200, damage: 0, range: 0, fireRate: 0,
-    path: 'bank', level: 3, bank: true, bankRate: 2.5,
-    desc: '초당 +2.5 크레딧.'
+    path: 'bank', level: 3, bank: true, bankRate: 1.5,
+    desc: '초당 +1.5 크레딧.'
   },
   bank4: {
     key: 'bank4', name: '조폐국 Lv.4', icon: '💰', color: '#e08800',
     cost: 400, damage: 0, range: 0, fireRate: 0,
-    path: 'bank', level: 4, bank: true, bankRate: 5.0,
-    desc: '초당 +5 크레딧.'
+    path: 'bank', level: 4, bank: true, bankRate: 3.0,
+    desc: '초당 +3 크레딧.'
   },
   bank5: {
     key: 'bank5', name: '왕립조폐국 Lv.5', icon: '💰', color: '#c06000',
     cost: 700, damage: 0, range: 0, fireRate: 0,
-    path: 'bank', level: 5, bank: true, bankRate: 9.0,
-    desc: '초당 +9 크레딧.'
+    path: 'bank', level: 5, bank: true, bankRate: 6.0,
+    desc: '초당 +6 크레딧.'
   },
 };
 
@@ -270,12 +270,12 @@ const UPGRADES = {
 // Ant kinds (base stats; scale by wave via ensureHp & speed)
 // ============================================================
 const ANT_KINDS = {
-  basic:    { hp: 14,  speed: 55, reward: 3,   r: 7,  color: '#2a1a0f', perWaveHp: 0.04 },
-  fast:     { hp:  9,  speed: 92, reward: 3,   r: 6,  color: '#3a2014', perWaveHp: 0.03 },
-  tank:     { hp: 46,  speed: 36, reward: 9,   r: 10, color: '#1a0a05', perWaveHp: 0.025 },
-  elite:    { hp: 90,  speed: 48, reward: 18,  r: 9,  color: '#4d1f0a', perWaveHp: 0.025 },
-  bossMini: { hp: 320, speed: 30, reward: 60,  r: 15, color: '#2d0a2a', perWaveHp: 0, isBoss: true, tier: 'mini' },
-  bossBig:  { hp: 780, speed: 22, reward: 180, r: 20, color: '#3d0810', perWaveHp: 0, isBoss: true, tier: 'big' },
+  basic:    { hp: 14,  speed: 55, reward: 2,   r: 7,  color: '#2a1a0f', perWaveHp: 0.04 },
+  fast:     { hp:  9,  speed: 92, reward: 2,   r: 6,  color: '#3a2014', perWaveHp: 0.03 },
+  tank:     { hp: 46,  speed: 36, reward: 5,   r: 10, color: '#1a0a05', perWaveHp: 0.025 },
+  elite:    { hp: 90,  speed: 48, reward: 10,  r: 9,  color: '#4d1f0a', perWaveHp: 0.025 },
+  bossMini: { hp: 320, speed: 30, reward: 30,  r: 15, color: '#2d0a2a', perWaveHp: 0, isBoss: true, tier: 'mini' },
+  bossBig:  { hp: 780, speed: 22, reward: 100, r: 20, color: '#3d0810', perWaveHp: 0, isBoss: true, tier: 'big' },
 };
 
 // ============================================================

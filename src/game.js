@@ -1,5 +1,9 @@
 'use strict';
 
+// Max ants allowed on screen at once. Extra spawns wait in the queue.
+// Keeps late-wave swarms from turning into frame drops on weaker machines.
+const MAX_ACTIVE_ANTS = 120;
+
 // ============================================================
 // Game — top-level orchestration: state, main loop, input, UI wiring.
 // ============================================================
@@ -203,9 +207,9 @@ class Game {
   startWave() {
     if (this.wave >= WAVES.length) return;
     this.wave++;
-    // Exponential HP scaling: +7% per wave, compounded.
-    // w1 = 1x, w10 ≈ 1.8x, w30 ≈ 7.6x, w50 ≈ 29x, w70 ≈ 113x.
-    this.waveHpMul = Math.pow(1.07, this.wave - 1);
+    // Exponential HP scaling: +8% per wave, compounded.
+    // w1 = 1x, w10 ≈ 2.0x, w30 ≈ 9.3x, w50 ≈ 43x, w70 ≈ 202x.
+    this.waveHpMul = Math.pow(1.08, this.wave - 1);
     this.spawnQueue = [];
     for (const group of WAVES[this.wave - 1]) {
       for (let i = 0; i < group.count; i++) {
@@ -223,6 +227,11 @@ class Game {
     } else if (this.waveState === 'spawning') {
       this.spawnTimer -= dt;
       while (this.spawnTimer <= 0 && this.spawnQueue.length > 0) {
+        // Stop spawning while the field is saturated; resume once kills free up room.
+        if (this.ants.length >= MAX_ACTIVE_ANTS) {
+          if (this.spawnTimer < 0) this.spawnTimer = 0;
+          break;
+        }
         const next = this.spawnQueue.shift();
         this.ants.push(new Ant(this, next.kind, this.waveHpMul));
         this.spawnTimer += next.delay;
@@ -235,7 +244,7 @@ class Game {
         } else {
           this.waveState = 'prep';
           this.waveTimer = 4;
-          this.credits += 20 + this.wave * 5;
+          this.credits += 8 + this.wave * 2;
           this.updateHUD();
         }
       }
